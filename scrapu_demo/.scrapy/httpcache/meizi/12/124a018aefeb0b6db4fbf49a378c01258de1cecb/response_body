@@ -1,0 +1,1 @@
+{"info": {"line_number": 5, "source": "[string \"function main(splash, args) ...\"]", "message": "Lua error: [string \"function main(splash, args) ...\"]:5: http404", "type": "LUA_ERROR", "error": "http404"}, "description": "Error happened while executing Lua script", "type": "ScriptError", "error": 400}

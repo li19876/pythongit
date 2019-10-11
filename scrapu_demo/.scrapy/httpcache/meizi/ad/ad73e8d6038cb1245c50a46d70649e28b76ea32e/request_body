@@ -1,0 +1,9 @@
+{
+    "headers": {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en",
+        "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.0 Safari/537.36"
+    },
+    "lua_source": "\n                    --splash.response_body_enabled = true\n                    splash.private_mode_enabled = false\n                    splash:set_user_agent(\"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36\")\n                    assert(splash:go(\"https://item.jd.com/5089239.html\"))\n                    splash:wait(3)\n                    return {html = splash:html()}\n                    ",
+    "url": "https://item.jd.com/5089239.html"
+}
