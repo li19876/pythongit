@@ -8,8 +8,8 @@ import pymysql
 
 
 def crow(n, l):  # 参数n 区分第几个线程，l存储url的列表+
-    db = pymysql.connect(host="127.0.0.1", port=3306, user="root", password="li123456..", db="lys", charset="utf8")
-    cursor = db.cursor()
+    ndb = pymysql.connect(host="127.0.0.1", port=3306, user="root", password="li123456..", db="lys", charset="utf8")
+    ncursor = ndb.cursor()
     lock = threading.Lock()
     sym = 0  # 是否连续三次抓取失败的标志位
     pc = get_cookie()  # 获取IP 和 Cookie
@@ -50,12 +50,12 @@ def crow(n, l):  # 参数n 区分第几个线程，l存储url的列表+
                 lock.acquire()
                 try:
 
-                    save(info)
+                    save(info,ndb,ncursor)
 
 
                 except Exception as e:
                     print("写入异常:",e)
-                    db.rollback()
+                    # db.rollback()
                 lock.release()
             if sym > 2:  # 连续三次抓取失败，换ip、cookie
                 sym = 0
@@ -66,23 +66,26 @@ def crow(n, l):  # 参数n 区分第几个线程，l存储url的列表+
             print('&&&&线程：%d结束' % n)
             break
 
-def save(info):
+def save(info,ndb,ncur):
     sql = """
-        update meituan set address='{}',phone='{}',perprice='{}',businesshours='{}',star='{}',
-        speaknum='{}',status='1',pub1='{}',pub2='{}' where id = '{}'
+        update meituan set address="{}",phone="{}",perprice="{}",businesshours="{}",star="{}",
+        speaknum="{}",status="1",pub1="{}",pub2="{}" where id = "{}"
     """.format(info[3],info[4],info[5],info[6],info[7],info[8],info[9],info[10],info[0])
-    db.ping(reconnect=True)
-    cursor.execute(sql)
-    db.commit()
+    ndb.ping(reconnect=True)
+    ncur.execute(sql)
+    ndb.commit()
 if __name__ == '__main__':
     db = pymysql.connect(host="127.0.0.1", port=3306, user="root", password="li123456..", db="lys", charset="utf8")
     cursor = db.cursor()
     url_list = []
     sql ="""
-        select name,category,poiid,ctpoi,id from meituan where status=''
+        select name,category,poiid,ctpoi,id from meituan where status is null
     """
     cursor.execute(sql)
     res=cursor.fetchall()
+    cursor.close()
+    db.close()
+    # print(len(res))
     for line in res:
         # print(line)
         d_list = ['', '','']
@@ -93,7 +96,7 @@ if __name__ == '__main__':
         url_list.append(d_list)
 
     th_list = []
-    for i in range(1, 2):
+    for i in range(1, 4):
         t = threading.Thread(target=crow, args=(i, url_list,))
         print('*****线程%d开始启动...' % i)
         t.start()

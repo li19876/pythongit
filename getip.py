@@ -1,6 +1,6 @@
 import time
 import requests
-import json
+import sendemail
 import pymysql
 import threading
 db =pymysql.connect(host="localhost",port=3306,user="root",password="li123456..",db='lys',charset="utf8")
@@ -40,6 +40,17 @@ def getnew():
     while True:
         try:
             now = int(time.time())
+            beforehour = now -3600
+            select ="""
+                select * from proxies where guoqitime < {} and guoqitime > {}
+            """.format(now+300,beforehour)
+            num=curosr.execute(select)
+            print("一小时内获取的ip数是:",num)
+            # print(type(num))
+            # exit()
+            if num>=100:
+                sendemail.sendemail("li.yansong@hzsr-media.com", "IP异常获取", "1小时内获取了超过100IP")
+                return False
             ip = requests.get(url).text
             re = requests.get("http://icanhazip.com", proxies={"http": ip[0:-2]}, timeout=(3, 10))
             insert = """
@@ -61,4 +72,4 @@ def getnew():
             time.sleep(2)
 
 if __name__ == '__main__':
-    print(getip())
+    getnew()
