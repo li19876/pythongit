@@ -96,7 +96,7 @@ if __name__ == '__main__':
         url_list.append(d_list)
 
     th_list = []
-    for i in range(1, 4):
+    for i in range(1, 2):
         t = threading.Thread(target=crow, args=(i, url_list,))
         print('*****线程%d开始启动...' % i)
         t.start()

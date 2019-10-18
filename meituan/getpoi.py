@@ -6,1069 +6,1724 @@ import json
 from getip import getip
 import pymysql
 from get_cookies import get_cookie
-ci ='20'
-city='广州'
-db = pymysql.connect(host="127.0.0.1",port = 3306,user="root",password="li123456..",db="lys",charset="utf8")
-cursor=db.cursor()
-# 区域店铺id ct_Poi cateName抓取，传入参数为区域id
-def crow_id(areaid,cookie,uuid,ua):
 
-	id_list = []
-	url = 'https://meishi.meituan.com/i/api/channel/deal/list'
-	head = {'Host': 'meishi.meituan.com',
-			'Accept': 'application/json',
-			'Accept-Encoding': 'gzip, deflate, br',
-			'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-			'Referer': 'http://meishi.meituan.com/i/?ci='+ci+'&stid_b=1&cevent=imt%2Fhomepage%2Fcategory1%2F1',
-			'User-Agent': ua,
-			'Cookie' :cookie
-			}
-	p = {'http': 'http://'+getip()}
-	data = {"uuid": uuid, "version": "8.3.3", "platform": 3, "app": "",
-			"partner": 126, "riskLevel": 1, "optimusCode": 10,
-			"originUrl": "http://meishi.meituan.com/i/?ci="+ci+"&stid_b=1&cevent=imt%2Fhomepage%2Fcategory1%2F1",
-			"offset": 0, "limit": 15, "cateId": 1, "lineId": 0, "stationId": 0, "areaId": areaid, "sort": "default",
-			"deal_attr_23": "", "deal_attr_24": "", "deal_attr_25": "", "poi_attr_20043": "", "poi_attr_20033": ""}
-	r = requests.post(url, headers=head, data=data, proxies=p)
-	print(r.text)
-	result = json.loads(r.text)
-	if "data" not in result:
-		return False
-	totalcount = result['data']['poiList']['totalCount']  # 获取该分区店铺总数，计算出要翻的页数
-	datas = result['data']['poiList']['poiInfos']
-	print(len(datas), totalcount)
-	for d in datas:
-		d_list = ['', '', '', '', '', '']
-		d_list[0] = d['name']
-		d_list[1] = d['cateName']
-		d_list[2] = d['poiid']
-		d_list[3] = d['ctPoi']
-		d_list[4] = d['areaName']
-		d_list[5] = city
-		id_list.append(d_list)
-	# print(id_list)
-	# 将数据保存到本地csv
-	# with open('mt_id.csv', 'a', newline='', encoding='gb18030')as f:
-	# 	write = csv.writer(f)
-	try:
-		for i in id_list:
-			# write.writerow(i)
-			save(i)
-		db.commit()
-	except Exception as e:
-		print("写入发生了异常:",e)
-		db.rollback()
-	# 开始爬取第2页到最后一页
-	offset = 0
-	if totalcount > 15:
-		totalcount -= 15
-		while offset < totalcount:
-			id_list = []
-			offset += 15
-			m = offset / 15 + 1
-			print('Page:%d' % m)
-			# 构造post请求参数，通过改变offset实现翻页
-			data2 = {"uuid": uuid, "version": "8.3.3", "platform": 3, "app": "",
-					 "partner": 126, "riskLevel": 1, "optimusCode": 10,
-					 "originUrl": "http://meishi.meituan.com/i/?ci="+ci+"&stid_b=1&cevent=imt%2Fhomepage%2Fcategory1%2F1",
-					 "offset": offset, "limit": 15, "cateId": 1, "lineId": 0, "stationId": 0, "areaId": areaid,
-					 "sort": "default",
-					 "deal_attr_23": "", "deal_attr_24": "", "deal_attr_25": "", "poi_attr_20043": "",
-					 "poi_attr_20033": ""}
-			try:
-				r = requests.post(url, headers=head, data=data2, proxies=p)
-				print(r.text)
-				result = json.loads(r.text)
-				if "data" not in result:
-					getip(1)
-					return False
-				datas = result['data']['poiList']['poiInfos']
-				print(len(datas))
-				for d in datas:
-					d_list = ['', '', '', '','','']
-					d_list[0] = d['name']
-					d_list[1] = d['cateName']
-					d_list[2] = d['poiid']
-					d_list[3] = d['ctPoi']
-					d_list[4] = d['areaName']
-					d_list[5] = city
-					id_list.append(d_list)
-				# 保存到本地
-				# with open('mt_id.csv', 'a', newline='', encoding='gb18030')as f:
-				# 	write = csv.writer(f)
-				# 	for i in id_list:
-				# 		write.writerow(i)
-				try:
-					for i in id_list:
-						# write.writerow(i)
-						save(i)
-					db.commit()
-				except Exception as e:
-					print("写入发生了异常:", e)
-					db.rollback()
-				time.sleep(1)
-			except Exception as e:
-				print(e)
-	return True
+ci = '50'
+city = '杭州'
+db = pymysql.connect(host="127.0.0.1", port=3306, user="root", password="li123456..", db="lys", charset="utf8")
+cursor = db.cursor()
+
+
+# 区域店铺id ct_Poi cateName抓取，传入参数为区域id
+def crow_id(areaid, cookie, uuid, ua):
+    id_list = []
+    url = 'https://meishi.meituan.com/i/api/channel/deal/list'
+    head = {'Host': 'meishi.meituan.com',
+            'Accept': 'application/json',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+            'Referer': 'http://meishi.meituan.com/i/?ci=' + ci + '&stid_b=1&cevent=imt%2Fhomepage%2Fcategory1%2F1',
+            'User-Agent': ua,
+            'Cookie': cookie
+            }
+    p = {'http': 'http://' + getip()}
+    data = {"uuid": uuid, "version": "8.3.3", "platform": 3, "app": "",
+            "partner": 126, "riskLevel": 1, "optimusCode": 10,
+            "originUrl": "http://meishi.meituan.com/i/?ci=" + ci + "&stid_b=1&cevent=imt%2Fhomepage%2Fcategory1%2F1",
+            "offset": 0, "limit": 15, "cateId": 1, "lineId": 0, "stationId": 0, "areaId": areaid, "sort": "default",
+            "deal_attr_23": "", "deal_attr_24": "", "deal_attr_25": "", "poi_attr_20043": "", "poi_attr_20033": ""}
+    r = requests.post(url, headers=head, data=data, proxies=p)
+    print(r.text)
+    result = json.loads(r.text)
+    if "data" not in result:
+        return False
+    totalcount = result['data']['poiList']['totalCount']  # 获取该分区店铺总数，计算出要翻的页数
+    datas = result['data']['poiList']['poiInfos']
+    print(len(datas), totalcount)
+    for d in datas:
+        d_list = ['', '', '', '', '', '']
+        d_list[0] = d['name']
+        d_list[1] = d['cateName']
+        d_list[2] = d['poiid']
+        d_list[3] = d['ctPoi']
+        d_list[4] = d['areaName']
+        d_list[5] = city
+        id_list.append(d_list)
+    # print(id_list)
+    # 将数据保存到本地csv
+    # with open('mt_id.csv', 'a', newline='', encoding='gb18030')as f:
+    # 	write = csv.writer(f)
+    try:
+        for i in id_list:
+            # write.writerow(i)
+            save(i)
+        db.commit()
+    except Exception as e:
+        print("写入发生了异常:", e)
+        db.rollback()
+    # 开始爬取第2页到最后一页
+    offset = 0
+    if totalcount > 15:
+        totalcount -= 15
+        while offset < totalcount:
+            id_list = []
+            offset += 15
+            m = offset / 15 + 1
+            print('Page:%d' % m)
+            # 构造post请求参数，通过改变offset实现翻页
+            data2 = {"uuid": uuid, "version": "8.3.3", "platform": 3, "app": "",
+                     "partner": 126, "riskLevel": 1, "optimusCode": 10,
+                     "originUrl": "http://meishi.meituan.com/i/?ci=" + ci + "&stid_b=1&cevent=imt%2Fhomepage%2Fcategory1%2F1",
+                     "offset": offset, "limit": 15, "cateId": 1, "lineId": 0, "stationId": 0, "areaId": areaid,
+                     "sort": "default",
+                     "deal_attr_23": "", "deal_attr_24": "", "deal_attr_25": "", "poi_attr_20043": "",
+                     "poi_attr_20033": ""}
+            try:
+                r = requests.post(url, headers=head, data=data2, proxies=p)
+                print(r.text)
+                result = json.loads(r.text)
+                if "data" not in result:
+                    getip(1)
+                    return False
+                datas = result['data']['poiList']['poiInfos']
+                print(len(datas))
+                for d in datas:
+                    d_list = ['', '', '', '', '', '']
+                    d_list[0] = d['name']
+                    d_list[1] = d['cateName']
+                    d_list[2] = d['poiid']
+                    d_list[3] = d['ctPoi']
+                    d_list[4] = d['areaName']
+                    d_list[5] = city
+                    id_list.append(d_list)
+                # 保存到本地
+                # with open('mt_id.csv', 'a', newline='', encoding='gb18030')as f:
+                # 	write = csv.writer(f)
+                # 	for i in id_list:
+                # 		write.writerow(i)
+                try:
+                    for i in id_list:
+                        # write.writerow(i)
+                        save(i)
+
+                except Exception as e:
+                    print("写入发生了异常:", e)
+                    db.rollback()
+                time.sleep(1)
+            except Exception as e:
+                print(e)
+    return True
+
+
 def save(res):
-	name = res[0]
-	category=res[1]
-	poiid=res[2]
-	ctpoi=res[3]
-	areaname = res[4]
-	city=res[5]
-	sql = """
+    name = res[0]
+    category = res[1]
+    poiid = res[2]
+    ctpoi = res[3]
+    areaname = res[4]
+    city = res[5]
+    sql = """
 		insert into meituan(name,category,poiid,ctpoi,areaname,city) values('{}','{}','{}','{}','{}','{}')
-	""".format(name,category,poiid,ctpoi,areaname,city)
-	cursor.execute(sql)
+	""".format(name, category, poiid, ctpoi, areaname, city)
+    cursor.execute(sql)
+    db.commit()
+
 
 if __name__ == '__main__':
-	# 直接将html代码中区域的信息复制出来，南澳新区的数据需要处理下，它下面没有分区
-	a = {
-	   "areaObj":{
-	"22": [{
-		"id": 22,
-		"name": "全部",
-		"regionName": "天河区",
-		"count": 5459
-	}, {
-		"id": 7782,
-		"name": "体育中心",
-		"regionName": "体育中心",
-		"count": 207
-	}, {
-		"id": 7784,
-		"name": "时尚天河",
-		"regionName": "时尚天河",
-		"count": 94
-	}, {
-		"id": 7783,
-		"name": "天河城/体育西",
-		"regionName": "天河城/体育西",
-		"count": 222
-	}, {
-		"id": 1177,
-		"name": "燕岭",
-		"regionName": "燕岭",
-		"count": 112
-	}, {
-		"id": 1380,
-		"name": "天河客运站",
-		"regionName": "天河客运站",
-		"count": 226
-	}, {
-		"id": 717,
-		"name": "棠下",
-		"regionName": "棠下",
-		"count": 438
-	}, {
-		"id": 1164,
-		"name": "东圃",
-		"regionName": "东圃",
-		"count": 677
-	}, {
-		"id": 1490,
-		"name": "龙洞",
-		"regionName": "龙洞",
-		"count": 407
-	}, {
-		"id": 714,
-		"name": "天河北/广州东站",
-		"regionName": "天河北/广州东站",
-		"count": 216
-	}, {
-		"id": 715,
-		"name": "岗顶/龙口",
-		"regionName": "岗顶/龙口",
-		"count": 257
-	}, {
-		"id": 716,
-		"name": "跑马场",
-		"regionName": "跑马场",
-		"count": 95
-	}, {
-		"id": 5199,
-		"name": "梅花园/天平架",
-		"regionName": "梅花园/天平架",
-		"count": 92
-	}, {
-		"id": 7791,
-		"name": "花城汇/高德置地",
-		"regionName": "花城汇/高德置地",
-		"count": 330
-	}, {
-		"id": 9651,
-		"name": "小新塘",
-		"regionName": "小新塘",
-		"count": 99
-	}, {
-		"id": 13162,
-		"name": "员村",
-		"regionName": "员村",
-		"count": 270
-	}, {
-		"id": 13163,
-		"name": "华景新城",
-		"regionName": "华景新城",
-		"count": 80
-	}, {
-		"id": 13875,
-		"name": "正佳广场",
-		"regionName": "正佳广场",
-		"count": 362
-	}, {
-		"id": 14319,
-		"name": "岑村/火炉山",
-		"regionName": "岑村/火炉山",
-		"count": 61
-	}, {
-		"id": 14391,
-		"name": "五山",
-		"regionName": "五山",
-		"count": 77
-	}, {
-		"id": 14405,
-		"name": "车陂",
-		"regionName": "车陂",
-		"count": 184
-	}, {
-		"id": 15110,
-		"name": "兴盛路/猎德",
-		"regionName": "兴盛路/猎德",
-		"count": 237
-	}, {
-		"id": 15112,
-		"name": "珠江新城",
-		"regionName": "珠江新城",
-		"count": 168
-	}, {
-		"id": 18528,
-		"name": "石牌/百脑汇",
-		"regionName": "石牌/百脑汇",
-		"count": 286
-	}, {
-		"id": 18529,
-		"name": "天河公园/上社",
-		"regionName": "天河公园/上社",
-		"count": 213
-	}],
-	"23": [{
-		"id": 23,
-		"name": "全部",
-		"regionName": "越秀区",
-		"count": 2144
-	}, {
-		"id": 1065,
-		"name": "中山二三路/东山口",
-		"regionName": "中山二三路/东山口",
-		"count": 238
-	}, {
-		"id": 1066,
-		"name": "五羊新城",
-		"regionName": "五羊新城",
-		"count": 174
-	}, {
-		"id": 721,
-		"name": "东风中路/越秀公园",
-		"regionName": "东风中路/越秀公园",
-		"count": 80
-	}, {
-		"id": 1070,
-		"name": "麓湖公园周边",
-		"regionName": "麓湖公园周边",
-		"count": 64
-	}, {
-		"id": 722,
-		"name": "中山六路",
-		"regionName": "中山六路",
-		"count": 174
-	}, {
-		"id": 723,
-		"name": "火车站/人民北路",
-		"regionName": "火车站/人民北路",
-		"count": 96
-	}, {
-		"id": 1276,
-		"name": "海珠广场",
-		"regionName": "海珠广场",
-		"count": 29
-	}, {
-		"id": 719,
-		"name": "北京路商业区",
-		"regionName": "北京路商业区",
-		"count": 604
-	}, {
-		"id": 720,
-		"name": "沿江路沿线/二沙岛",
-		"regionName": "沿江路沿线/二沙岛",
-		"count": 133
-	}, {
-		"id": 7775,
-		"name": "东风东/杨箕",
-		"regionName": "东风东/杨箕",
-		"count": 64
-	}, {
-		"id": 19656,
-		"name": "瑶台",
-		"regionName": "瑶台",
-		"count": 17
-	}, {
-		"id": 19682,
-		"name": "建设六马路",
-		"regionName": "建设六马路",
-		"count": 120
-	}, {
-		"id": 19683,
-		"name": "淘金",
-		"regionName": "淘金",
-		"count": 80
-	}, {
-		"id": 19684,
-		"name": "黄花岗",
-		"regionName": "黄花岗",
-		"count": 23
-	}, {
-		"id": 19685,
-		"name": "环市东路/区庄",
-		"regionName": "环市东路/区庄",
-		"count": 47
-	}, {
-		"id": 19686,
-		"name": "动物园南门",
-		"regionName": "动物园南门",
-		"count": 22
-	}, {
-		"id": 21631,
-		"name": "东山口/农林下路",
-		"regionName": "东山口/农林下路",
-		"count": 22
-	}, {
-		"id": 21642,
-		"name": "中华广场",
-		"regionName": "中华广场",
-		"count": 47
-	}],
-	"24": [{
-		"id": 24,
-		"name": "全部",
-		"regionName": "海珠区",
-		"count": 2931
-	}, {
-		"id": 1494,
-		"name": "江南西",
-		"regionName": "江南西",
-		"count": 322
-	}, {
-		"id": 727,
-		"name": "滨江路沿线",
-		"regionName": "滨江路沿线",
-		"count": 218
-	}, {
-		"id": 725,
-		"name": "江南大道沿线",
-		"regionName": "江南大道沿线",
-		"count": 319
-	}, {
-		"id": 1179,
-		"name": "工业大道沿线",
-		"regionName": "工业大道沿线",
-		"count": 329
-	}, {
-		"id": 726,
-		"name": "新港西路沿线",
-		"regionName": "新港西路沿线",
-		"count": 155
-	}, {
-		"id": 1165,
-		"name": "客村/赤岗",
-		"regionName": "客村/赤岗",
-		"count": 443
-	}, {
-		"id": 1178,
-		"name": "东晓南路沿线",
-		"regionName": "东晓南路沿线",
-		"count": 358
-	}, {
-		"id": 8961,
-		"name": "琶洲",
-		"regionName": "琶洲",
-		"count": 263
-	}],
-	"25": [{
-		"id": 25,
-		"name": "全部",
-		"regionName": "荔湾区",
-		"count": 1582
-	}, {
-		"id": 1067,
-		"name": "芳村",
-		"regionName": "芳村",
-		"count": 321
-	}, {
-		"id": 730,
-		"name": "中山七八路",
-		"regionName": "中山七八路",
-		"count": 231
-	}, {
-		"id": 1971,
-		"name": "恒宝广场",
-		"regionName": "恒宝广场",
-		"count": ""
-	}, {
-		"id": 731,
-		"name": "沙面",
-		"regionName": "沙面",
-		"count": 60
-	}, {
-		"id": 729,
-		"name": "上下九商业区",
-		"regionName": "上下九商业区",
-		"count": 378
-	}, {
-		"id": 7540,
-		"name": "康王路",
-		"regionName": "康王路",
-		"count": 113
-	}, {
-		"id": 7669,
-		"name": "西村西场",
-		"regionName": "西村西场",
-		"count": 118
-	}, {
-		"id": 8925,
-		"name": "西城都荟",
-		"regionName": "西城都荟",
-		"count": 6
-	}, {
-		"id": 23262,
-		"name": "滘口",
-		"regionName": "滘口",
-		"count": 14
-	}, {
-		"id": 25088,
-		"name": "坦尾/河沙",
-		"regionName": "坦尾/河沙",
-		"count": 54
-	}],
-	"26": [{
-		"id": 26,
-		"name": "全部",
-		"regionName": "白云区",
-		"count": 5176
-	}, {
-		"id": 734,
-		"name": "机场路沿线",
-		"regionName": "机场路沿线",
-		"count": 269
-	}, {
-		"id": 1180,
-		"name": "白云大道沿线",
-		"regionName": "白云大道沿线",
-		"count": 287
-	}, {
-		"id": 1493,
-		"name": "新市",
-		"regionName": "新市",
-		"count": 415
-	}, {
-		"id": 735,
-		"name": "三元里",
-		"regionName": "三元里",
-		"count": 246
-	}, {
-		"id": 733,
-		"name": "广园新村",
-		"regionName": "广园新村",
-		"count": 110
-	}, {
-		"id": 1491,
-		"name": "同德围",
-		"regionName": "同德围",
-		"count": 206
-	}, {
-		"id": 1181,
-		"name": "同和/京溪",
-		"regionName": "同和/京溪",
-		"count": 476
-	}, {
-		"id": 1492,
-		"name": "罗冲围/金沙洲",
-		"regionName": "罗冲围/金沙洲",
-		"count": 351
-	}, {
-		"id": 5193,
-		"name": "嘉禾/人和",
-		"regionName": "嘉禾/人和",
-		"count": 246
-	}, {
-		"id": 5196,
-		"name": "永泰",
-		"regionName": "永泰",
-		"count": 210
-	}, {
-		"id": 7535,
-		"name": "嘉裕太阳城",
-		"regionName": "嘉裕太阳城",
-		"count": 38
-	}, {
-		"id": 7536,
-		"name": "五号停机坪",
-		"regionName": "五号停机坪",
-		"count": 50
-	}, {
-		"id": 7537,
-		"name": "黄石",
-		"regionName": "黄石",
-		"count": 187
-	}, {
-		"id": 7539,
-		"name": "万达广场",
-		"regionName": "万达广场",
-		"count": 110
-	}, {
-		"id": 15984,
-		"name": "黄边",
-		"regionName": "黄边",
-		"count": 83
-	}, {
-		"id": 16022,
-		"name": "石井",
-		"regionName": "石井",
-		"count": 285
-	}, {
-		"id": 16091,
-		"name": "钟落潭",
-		"regionName": "钟落潭",
-		"count": 113
-	}, {
-		"id": 17078,
-		"name": "江高",
-		"regionName": "江高",
-		"count": 118
-	}, {
-		"id": 17256,
-		"name": "均禾",
-		"regionName": "均禾",
-		"count": 219
-	}, {
-		"id": 18064,
-		"name": "太和镇",
-		"regionName": "太和镇",
-		"count": 245
-	}, {
-		"id": 25072,
-		"name": "白云绿地中心",
-		"regionName": "白云绿地中心",
-		"count": 27
-	}, {
-		"id": 26659,
-		"name": "凯德广场",
-		"regionName": "凯德广场",
-		"count": 31
-	}, {
-		"id": 27976,
-		"name": "白云国际机场",
-		"regionName": "白云国际机场",
-		"count": 11
-	}, {
-		"id": 37939,
-		"name": "嘉禾望岗",
-		"regionName": "嘉禾望岗",
-		"count": 233
-	}],
-	"274": [{
-		"id": 274,
-		"name": "全部",
-		"regionName": "番禺区",
-		"count": 4285
-	}, {
-		"id": 1182,
-		"name": "市桥",
-		"regionName": "市桥",
-		"count": 684
-	}, {
-		"id": 9023,
-		"name": "市桥南",
-		"regionName": "市桥南",
-		"count": 200
-	}, {
-		"id": 1461,
-		"name": "番禺广场",
-		"regionName": "番禺广场",
-		"count": 256
-	}, {
-		"id": 1184,
-		"name": "大学城",
-		"regionName": "大学城",
-		"count": 295
-	}, {
-		"id": 9024,
-		"name": "沙湾镇",
-		"regionName": "沙湾镇",
-		"count": 139
-	}, {
-		"id": 1183,
-		"name": "大石",
-		"regionName": "大石",
-		"count": 456
-	}, {
-		"id": 5187,
-		"name": "洛溪",
-		"regionName": "洛溪",
-		"count": 270
-	}, {
-		"id": 7541,
-		"name": "长隆/南村/万达",
-		"regionName": "长隆/南村/万达",
-		"count": 763
-	}, {
-		"id": 7542,
-		"name": "钟村",
-		"regionName": "钟村",
-		"count": 483
-	}, {
-		"id": 9276,
-		"name": "石基",
-		"regionName": "石基",
-		"count": 225
-	}, {
-		"id": 14179,
-		"name": "石楼",
-		"regionName": "石楼",
-		"count": 134
-	}, {
-		"id": 18905,
-		"name": "南浦",
-		"regionName": "南浦",
-		"count": 117
-	}, {
-		"id": 23275,
-		"name": "广州南站",
-		"regionName": "广州南站",
-		"count": 22
-	}],
-	"737": [{
-		"id": 737,
-		"name": "全部",
-		"regionName": "黄埔区",
-		"count": 1165
-	}, {
-		"id": 8029,
-		"name": "大沙地",
-		"regionName": "大沙地",
-		"count": 258
-	}, {
-		"id": 8030,
-		"name": "文冲",
-		"regionName": "文冲",
-		"count": 75
-	}, {
-		"id": 8031,
-		"name": "鱼珠",
-		"regionName": "鱼珠",
-		"count": 9
-	}, {
-		"id": 8032,
-		"name": "科学城/萝岗高德汇",
-		"regionName": "科学城/萝岗高德汇",
-		"count": 58
-	}, {
-		"id": 8033,
-		"name": "中心城",
-		"regionName": "中心城",
-		"count": 164
-	}, {
-		"id": 8034,
-		"name": "开发区东区",
-		"regionName": "开发区东区",
-		"count": 167
-	}, {
-		"id": 8035,
-		"name": "开发区西区",
-		"regionName": "开发区西区",
-		"count": 22
-	}, {
-		"id": 8797,
-		"name": "生活区/南岗",
-		"regionName": "生活区/南岗",
-		"count": 109
-	}, {
-		"id": 17692,
-		"name": "长洲岛",
-		"regionName": "长洲岛",
-		"count": 23
-	}, {
-		"id": 22706,
-		"name": "万达广场",
-		"regionName": "万达广场",
-		"count": 148
-	}, {
-		"id": 38999,
-		"name": "联和联世广场",
-		"regionName": "联和联世广场",
-		"count": 9
-	}],
-	"738": [{
-		"id": 738,
-		"name": "全部",
-		"regionName": "花都区",
-		"count": 2077
-	}, {
-		"id": 5882,
-		"name": "新世纪广场",
-		"regionName": "新世纪广场",
-		"count": 112
-	}, {
-		"id": 5883,
-		"name": "梯面",
-		"regionName": "梯面",
-		"count": 2
-	}, {
-		"id": 5884,
-		"name": "花山",
-		"regionName": "花山",
-		"count": 32
-	}, {
-		"id": 5885,
-		"name": "炭步",
-		"regionName": "炭步",
-		"count": 5
-	}, {
-		"id": 5886,
-		"name": "赤坭",
-		"regionName": "赤坭",
-		"count": 28
-	}, {
-		"id": 5887,
-		"name": "狮岭",
-		"regionName": "狮岭",
-		"count": 244
-	}, {
-		"id": 5888,
-		"name": "花东",
-		"regionName": "花东",
-		"count": 18
-	}, {
-		"id": 5889,
-		"name": "雅瑶",
-		"regionName": "雅瑶",
-		"count": 13
-	}, {
-		"id": 13356,
-		"name": "北站/建设路",
-		"regionName": "北站/建设路",
-		"count": 111
-	}, {
-		"id": 13357,
-		"name": "花都广场",
-		"regionName": "花都广场",
-		"count": 183
-	}, {
-		"id": 13362,
-		"name": "大润发",
-		"regionName": "大润发",
-		"count": 263
-	}, {
-		"id": 13715,
-		"name": "建设北路",
-		"regionName": "建设北路",
-		"count": 223
-	}, {
-		"id": 13904,
-		"name": "花都体育场",
-		"regionName": "花都体育场",
-		"count": 141
-	}, {
-		"id": 13905,
-		"name": "秀全公园",
-		"regionName": "秀全公园",
-		"count": 9
-	}, {
-		"id": 14053,
-		"name": "饮食风情街",
-		"regionName": "饮食风情街",
-		"count": 35
-	}, {
-		"id": 16090,
-		"name": "白云国际机场",
-		"regionName": "白云国际机场",
-		"count": 86
-	}, {
-		"id": 23248,
-		"name": "莲塘",
-		"regionName": "莲塘",
-		"count": 13
-	}, {
-		"id": 36192,
-		"name": "雅居乐锦城/保利花城",
-		"regionName": "雅居乐锦城/保利花城",
-		"count": 62
-	}, {
-		"id": 36194,
-		"name": "骏壹万邦",
-		"regionName": "骏壹万邦",
-		"count": 33
-	}, {
-		"id": 39346,
-		"name": "马溪",
-		"regionName": "马溪",
-		"count": 17
-	}, {
-		"id": 39659,
-		"name": "美林湖",
-		"regionName": "美林湖",
-		"count": ""
-	}],
-	"739": [{
-		"id": 739,
-		"name": "全部",
-		"regionName": "增城市",
-		"count": 1192
-	}, {
-		"id": 13071,
-		"name": "万达广场",
-		"regionName": "万达广场",
-		"count": 109
-	}, {
-		"id": 9181,
-		"name": "太阳城/凯旋门",
-		"regionName": "太阳城/凯旋门",
-		"count": 88
-	}, {
-		"id": 7718,
-		"name": "新塘大润发/新好景",
-		"regionName": "新塘大润发/新好景",
-		"count": 143
-	}, {
-		"id": 9178,
-		"name": "东汇城/人人乐",
-		"regionName": "东汇城/人人乐",
-		"count": 89
-	}, {
-		"id": 9180,
-		"name": "荔城挂绿/泰富广场",
-		"regionName": "荔城挂绿/泰富广场",
-		"count": 4
-	}, {
-		"id": 9504,
-		"name": "白水寨/派潭",
-		"regionName": "白水寨/派潭",
-		"count": 32
-	}, {
-		"id": 13070,
-		"name": "新塘广场",
-		"regionName": "新塘广场",
-		"count": 68
-	}, {
-		"id": 13113,
-		"name": "凤凰城",
-		"regionName": "凤凰城",
-		"count": 98
-	}, {
-		"id": 16723,
-		"name": "佰乐广场",
-		"regionName": "佰乐广场",
-		"count": 6
-	}, {
-		"id": 27311,
-		"name": "朱村镇",
-		"regionName": "朱村镇",
-		"count": 14
-	}, {
-		"id": 27313,
-		"name": "中新镇",
-		"regionName": "中新镇",
-		"count": 27
-	}, {
-		"id": 27483,
-		"name": "沙埔镇",
-		"regionName": "沙埔镇",
-		"count": 30
-	}, {
-		"id": 27485,
-		"name": "永和镇",
-		"regionName": "永和镇",
-		"count": 85
-	}, {
-		"id": 37286,
-		"name": "合汇城广场",
-		"regionName": "合汇城广场",
-		"count": 8
-	}, {
-		"id": 38530,
-		"name": "挂绿广场/泰富广场",
-		"regionName": "挂绿广场/泰富广场",
-		"count": 86
-	}, {
-		"id": 39909,
-		"name": "敏捷锦绣广场",
-		"regionName": "敏捷锦绣广场",
-		"count": 11
-	}],
-	"740": [{
-		"id": 740,
-		"name": "全部",
-		"regionName": "从化市",
-		"count": 624
-	}, {
-		"id": 13069,
-		"name": "温泉镇",
-		"regionName": "温泉镇",
-		"count": 86
-	}, {
-		"id": 13150,
-		"name": "街口/新世纪广场",
-		"regionName": "街口/新世纪广场",
-		"count": 195
-	}, {
-		"id": 13153,
-		"name": "江埔",
-		"regionName": "江埔",
-		"count": 31
-	}, {
-		"id": 13157,
-		"name": "欣荣宏广场",
-		"regionName": "欣荣宏广场",
-		"count": 89
-	}, {
-		"id": 15240,
-		"name": "商贸城",
-		"regionName": "商贸城",
-		"count": 40
-	}, {
-		"id": 15242,
-		"name": "碧水湾/碧水新村",
-		"regionName": "碧水湾/碧水新村",
-		"count": 20
-	}, {
-		"id": 16273,
-		"name": "太平镇/太平商业街",
-		"regionName": "太平镇/太平商业街",
-		"count": 34
-	}, {
-		"id": 17630,
-		"name": "旺城",
-		"regionName": "旺城",
-		"count": 10
-	}, {
-		"id": 23258,
-		"name": "溪头村",
-		"regionName": "溪头村",
-		"count": 19
-	}, {
-		"id": 25818,
-		"name": "鳌头",
-		"regionName": "鳌头",
-		"count": 9
-	}, {
-		"id": 26381,
-		"name": "良口镇",
-		"regionName": "良口镇",
-		"count": 24
-	}],
-	"1068": [{
-		"id": 1068,
-		"name": "全部",
-		"regionName": "南沙区",
-		"count": 512
-	}, {
-		"id": 13845,
-		"name": "黄阁镇",
-		"regionName": "黄阁镇",
-		"count": 28
-	}, {
-		"id": 13848,
-		"name": "金洲商业街",
-		"regionName": "金洲商业街",
-		"count": 42
-	}, {
-		"id": 13850,
-		"name": "华汇广场",
-		"regionName": "华汇广场",
-		"count": 30
-	}, {
-		"id": 13853,
-		"name": "板头",
-		"regionName": "板头",
-		"count": 23
-	}, {
-		"id": 15265,
-		"name": "东涌镇",
-		"regionName": "东涌镇",
-		"count": 50
-	}, {
-		"id": 15267,
-		"name": "大岗",
-		"regionName": "大岗",
-		"count": 66
-	}, {
-		"id": 15269,
-		"name": "珠江旧镇",
-		"regionName": "珠江旧镇",
-		"count": 30
-	}, {
-		"id": 18624,
-		"name": "百万葵园/十九涌",
-		"regionName": "百万葵园/十九涌",
-		"count": 11
-	}, {
-		"id": 18626,
-		"name": "大涌",
-		"regionName": "大涌",
-		"count": 10
-	}, {
-		"id": 18628,
-		"name": "榄核镇",
-		"regionName": "榄核镇",
-		"count": 13
-	}, {
-		"id": 18630,
-		"name": "鱼窝头",
-		"regionName": "鱼窝头",
-		"count": 9
-	}, {
-		"id": 19803,
-		"name": "万顷沙镇",
-		"regionName": "万顷沙镇",
-		"count": 14
-	}, {
-		"id": 25709,
-		"name": "南沙万达广场",
-		"regionName": "南沙万达广场",
-		"count": 84
-	}]
-}
+    # 直接将html代码中区域的信息复制出来，南澳新区的数据需要处理下，它下面没有分区
+    a = {
+        "areaObj": {
+            "55": [{
+                "id": 55,
+                "name": "全部",
+                "regionName": "上城区",
+                "count": 1114
+            }, {
+                "id": 820,
+                "name": "鼓楼/河坊街",
+                "regionName": "鼓楼/河坊街",
+                "count": 25
+            }, {
+                "id": 821,
+                "name": "城站火车站/浙二医院",
+                "regionName": "城站火车站/浙二医院",
+                "count": 121
+            }, {
+                "id": 827,
+                "name": "湖滨",
+                "regionName": "湖滨",
+                "count": 68
+            }, {
+                "id": 1081,
+                "name": "西湖南山路/柳浪闻莺",
+                "regionName": "西湖南山路/柳浪闻莺",
+                "count": 16
+            }, {
+                "id": 5443,
+                "name": "平海路",
+                "regionName": "平海路",
+                "count": 104
+            }, {
+                "id": 5444,
+                "name": "湖滨/解百商厦",
+                "regionName": "湖滨/解百商厦",
+                "count": 78
+            }, {
+                "id": 5445,
+                "name": "复兴路/六和塔",
+                "regionName": "复兴路/六和塔",
+                "count": 2
+            }, {
+                "id": 15493,
+                "name": "汽车南站",
+                "regionName": "汽车南站",
+                "count": 19
+            }, {
+                "id": 16255,
+                "name": "西湖银泰",
+                "regionName": "西湖银泰",
+                "count": 76
+            }, {
+                "id": 17083,
+                "name": "浙一医院/庆春路沿线",
+                "regionName": "浙一医院/庆春路沿线",
+                "count": 94
+            }, {
+                "id": 19106,
+                "name": "江城路沿线",
+                "regionName": "江城路沿线",
+                "count": 31
+            }, {
+                "id": 27213,
+                "name": "四季青/婺江路地铁站",
+                "regionName": "四季青/婺江路地铁站",
+                "count": 15
+            }, {
+                "id": 32850,
+                "name": "复兴路沿线/南星",
+                "regionName": "复兴路沿线/南星",
+                "count": 39
+            }, {
+                "id": 32851,
+                "name": "近江/之江路",
+                "regionName": "近江/之江路",
+                "count": 113
+            }, {
+                "id": 32852,
+                "name": "吴山景区/万松岭路",
+                "regionName": "吴山景区/万松岭路",
+                "count": 19
+            }, {
+                "id": 32859,
+                "name": "吴山广场/西湖",
+                "regionName": "吴山广场/西湖",
+                "count": 7
+            }, {
+                "id": 32861,
+                "name": "清河坊/河坊街",
+                "regionName": "清河坊/河坊街",
+                "count": 36
+            }, {
+                "id": 32862,
+                "name": "清河坊/南宋御街",
+                "regionName": "清河坊/南宋御街",
+                "count": 40
+            }, {
+                "id": 32863,
+                "name": "定安路地铁站/西湖大道",
+                "regionName": "定安路地铁站/西湖大道",
+                "count": 20
+            }, {
+                "id": 32864,
+                "name": "龙翔桥/音乐喷泉",
+                "regionName": "龙翔桥/音乐喷泉",
+                "count": 114
+            }, {
+                "id": 32865,
+                "name": "龙翔桥/市一医院",
+                "regionName": "龙翔桥/市一医院",
+                "count": 26
+            }, {
+                "id": 38071,
+                "name": "西湖南山路/中国美术学院",
+                "regionName": "西湖南山路/中国美术学院",
+                "count": 17
+            }],
+            "56": [{
+                "id": 56,
+                "name": "全部",
+                "regionName": "下城区",
+                "count": 1464
+            }, {
+                "id": 5449,
+                "name": "北景园",
+                "regionName": "北景园",
+                "count": 173
+            }, {
+                "id": 17297,
+                "name": "中大银泰城",
+                "regionName": "中大银泰城",
+                "count": 63
+            }, {
+                "id": 37059,
+                "name": "新天地广场",
+                "regionName": "新天地广场",
+                "count": 11
+            }, {
+                "id": 37169,
+                "name": "西湖文化广场",
+                "regionName": "西湖文化广场",
+                "count": 104
+            }, {
+                "id": 37170,
+                "name": "武林银泰",
+                "regionName": "武林银泰",
+                "count": 21
+            }, {
+                "id": 37171,
+                "name": "嘉里中心",
+                "regionName": "嘉里中心",
+                "count": 65
+            }, {
+                "id": 37172,
+                "name": "河东路",
+                "regionName": "河东路",
+                "count": 31
+            }, {
+                "id": 37173,
+                "name": "皇后公园",
+                "regionName": "皇后公园",
+                "count": 18
+            }, {
+                "id": 37174,
+                "name": "杭州大厦",
+                "regionName": "杭州大厦",
+                "count": 27
+            }, {
+                "id": 37175,
+                "name": "武林广场",
+                "regionName": "武林广场",
+                "count": 26
+            }, {
+                "id": 37176,
+                "name": "武林夜市",
+                "regionName": "武林夜市",
+                "count": 83
+            }, {
+                "id": 37177,
+                "name": "wake town",
+                "regionName": "wake town",
+                "count": 20
+            }, {
+                "id": 37178,
+                "name": "国大城市广场",
+                "regionName": "国大城市广场",
+                "count": 36
+            }, {
+                "id": 37179,
+                "name": "武林路沿线",
+                "regionName": "武林路沿线",
+                "count": 8
+            }, {
+                "id": 37180,
+                "name": "体育场路沿线",
+                "regionName": "体育场路沿线",
+                "count": 31
+            }, {
+                "id": 37181,
+                "name": "建国路沿线",
+                "regionName": "建国路沿线",
+                "count": 82
+            }, {
+                "id": 37182,
+                "name": "延安路沿线",
+                "regionName": "延安路沿线",
+                "count": 39
+            }, {
+                "id": 37210,
+                "name": "武林路",
+                "regionName": "武林路",
+                "count": 49
+            }, {
+                "id": 38444,
+                "name": "新天地",
+                "regionName": "新天地",
+                "count": 58
+            }, {
+                "id": 39023,
+                "name": "西联广场",
+                "regionName": "西联广场",
+                "count": 12
+            }, {
+                "id": 39114,
+                "name": "和平广场",
+                "regionName": "和平广场",
+                "count": 109
+            }],
+            "57": [{
+                "id": 57,
+                "name": "全部",
+                "regionName": "拱墅区",
+                "count": 1032
+            }, {
+                "id": 822,
+                "name": "湖墅南路",
+                "regionName": "湖墅南路",
+                "count": 121
+            }, {
+                "id": 1166,
+                "name": "拱宸桥/上塘",
+                "regionName": "拱宸桥/上塘",
+                "count": 17
+            }, {
+                "id": 4735,
+                "name": "信义坊/胜利河美食街",
+                "regionName": "信义坊/胜利河美食街",
+                "count": 21
+            }, {
+                "id": 5450,
+                "name": "运河广场",
+                "regionName": "运河广场",
+                "count": 106
+            }, {
+                "id": 5452,
+                "name": "德胜路沿线",
+                "regionName": "德胜路沿线",
+                "count": 29
+            }, {
+                "id": 5453,
+                "name": "石祥路/沈半沿线",
+                "regionName": "石祥路/沈半沿线",
+                "count": 86
+            }, {
+                "id": 9160,
+                "name": "城西银泰城",
+                "regionName": "城西银泰城",
+                "count": 54
+            }, {
+                "id": 13092,
+                "name": "半山",
+                "regionName": "半山",
+                "count": 26
+            }, {
+                "id": 13324,
+                "name": "武林广场",
+                "regionName": "武林广场",
+                "count": 13
+            }, {
+                "id": 15626,
+                "name": "丝联166创意园",
+                "regionName": "丝联166创意园",
+                "count": 14
+            }, {
+                "id": 15776,
+                "name": "舟山东路大学美食街",
+                "regionName": "舟山东路大学美食街",
+                "count": 18
+            }, {
+                "id": 16840,
+                "name": "万达广场",
+                "regionName": "万达广场",
+                "count": 198
+            }, {
+                "id": 17568,
+                "name": "水晶城购物中心",
+                "regionName": "水晶城购物中心",
+                "count": 23
+            }, {
+                "id": 37251,
+                "name": "远洋乐堤港",
+                "regionName": "远洋乐堤港",
+                "count": 73
+            }, {
+                "id": 37252,
+                "name": "大兜路历史文化街",
+                "regionName": "大兜路历史文化街",
+                "count": 12
+            }, {
+                "id": 37253,
+                "name": "绿地中央广场",
+                "regionName": "绿地中央广场",
+                "count": 9
+            }, {
+                "id": 37254,
+                "name": "蓝钻天城购物中心",
+                "regionName": "蓝钻天城购物中心",
+                "count": 45
+            }, {
+                "id": 37255,
+                "name": "D32天阳购物中心",
+                "regionName": "D32天阳购物中心",
+                "count": 37
+            }, {
+                "id": 37256,
+                "name": "莫干山路沿线",
+                "regionName": "莫干山路沿线",
+                "count": 43
+            }, {
+                "id": 39182,
+                "name": "水晶城",
+                "regionName": "水晶城",
+                "count": 43
+            }],
+            "58": [{
+                "id": 58,
+                "name": "全部",
+                "regionName": "江干区",
+                "count": 2784
+            }, {
+                "id": 5454,
+                "name": "四季青",
+                "regionName": "四季青",
+                "count": 143
+            }, {
+                "id": 5456,
+                "name": "丁桥",
+                "regionName": "丁桥",
+                "count": 172
+            }, {
+                "id": 5458,
+                "name": "天城路沿线",
+                "regionName": "天城路沿线",
+                "count": 48
+            }, {
+                "id": 5461,
+                "name": "凯旋路/机场路沿线",
+                "regionName": "凯旋路/机场路沿线",
+                "count": 22
+            }, {
+                "id": 6229,
+                "name": "艮山西路",
+                "regionName": "艮山西路",
+                "count": 24
+            }, {
+                "id": 6230,
+                "name": "艮山东路",
+                "regionName": "艮山东路",
+                "count": 6
+            }, {
+                "id": 13943,
+                "name": "凤起东路",
+                "regionName": "凤起东路",
+                "count": 227
+            }, {
+                "id": 13944,
+                "name": "庆春东路",
+                "regionName": "庆春东路",
+                "count": 42
+            }, {
+                "id": 13945,
+                "name": "双菱路",
+                "regionName": "双菱路",
+                "count": 14
+            }, {
+                "id": 13946,
+                "name": "天虹购物中心",
+                "regionName": "天虹购物中心",
+                "count": 14
+            }, {
+                "id": 14336,
+                "name": "笕桥",
+                "regionName": "笕桥",
+                "count": 51
+            }, {
+                "id": 14389,
+                "name": "澳门广场",
+                "regionName": "澳门广场",
+                "count": 2
+            }, {
+                "id": 32849,
+                "name": "金桥街",
+                "regionName": "金桥街",
+                "count": 50
+            }, {
+                "id": 37212,
+                "name": "来福士广场",
+                "regionName": "来福士广场",
+                "count": 57
+            }, {
+                "id": 37213,
+                "name": "万象城",
+                "regionName": "万象城",
+                "count": 38
+            }, {
+                "id": 37214,
+                "name": "下沙龙湖时代天街",
+                "regionName": "下沙龙湖时代天街",
+                "count": 110
+            }, {
+                "id": 37215,
+                "name": "下沙宝龙城市广场",
+                "regionName": "下沙宝龙城市广场",
+                "count": 110
+            }, {
+                "id": 37216,
+                "name": "东站汇合城",
+                "regionName": "东站汇合城",
+                "count": 15
+            }, {
+                "id": 37217,
+                "name": "福雷德广场",
+                "regionName": "福雷德广场",
+                "count": 49
+            }, {
+                "id": 37218,
+                "name": "地铁东城广场",
+                "regionName": "地铁东城广场",
+                "count": 30
+            }, {
+                "id": 37219,
+                "name": "庆春银泰百货",
+                "regionName": "庆春银泰百货",
+                "count": 21
+            }, {
+                "id": 37220,
+                "name": "下沙银泰",
+                "regionName": "下沙银泰",
+                "count": 31
+            }, {
+                "id": 37221,
+                "name": "四季广场",
+                "regionName": "四季广场",
+                "count": 12
+            }, {
+                "id": 37222,
+                "name": "501城市广场",
+                "regionName": "501城市广场",
+                "count": 30
+            }, {
+                "id": 37223,
+                "name": "范家路沿线",
+                "regionName": "范家路沿线",
+                "count": 17
+            }, {
+                "id": 37224,
+                "name": "和达城",
+                "regionName": "和达城",
+                "count": 20
+            }, {
+                "id": 37225,
+                "name": "东站西子国际",
+                "regionName": "东站西子国际",
+                "count": 17
+            }, {
+                "id": 37226,
+                "name": "和达东东城",
+                "regionName": "和达东东城",
+                "count": 239
+            }, {
+                "id": 37227,
+                "name": "高沙商业街",
+                "regionName": "高沙商业街",
+                "count": 500
+            }, {
+                "id": 37228,
+                "name": "九堡新天地文化创意园",
+                "regionName": "九堡新天地文化创意园",
+                "count": 302
+            }, {
+                "id": 37229,
+                "name": "九堡金海城",
+                "regionName": "九堡金海城",
+                "count": 16
+            }, {
+                "id": 37241,
+                "name": "火车东站/高铁站",
+                "regionName": "火车东站/高铁站",
+                "count": 247
+            }, {
+                "id": 39925,
+                "name": "钱江新城",
+                "regionName": "钱江新城",
+                "count": 12
+            }],
+            "59": [{
+                "id": 59,
+                "name": "全部",
+                "regionName": "西湖区",
+                "count": 2419
+            }, {
+                "id": 5464,
+                "name": "文三路沿线",
+                "regionName": "文三路沿线",
+                "count": 283
+            }, {
+                "id": 5463,
+                "name": "文二路沿线",
+                "regionName": "文二路沿线",
+                "count": 163
+            }, {
+                "id": 1083,
+                "name": "西湖北线/黄龙",
+                "regionName": "西湖北线/黄龙",
+                "count": 167
+            }, {
+                "id": 1086,
+                "name": "龙井",
+                "regionName": "龙井",
+                "count": 51
+            }, {
+                "id": 5465,
+                "name": "灵隐/白乐桥",
+                "regionName": "灵隐/白乐桥",
+                "count": 32
+            }, {
+                "id": 5466,
+                "name": "西溪",
+                "regionName": "西溪",
+                "count": 93
+            }, {
+                "id": 5467,
+                "name": "西城广场",
+                "regionName": "西城广场",
+                "count": 22
+            }, {
+                "id": 5468,
+                "name": "转塘",
+                "regionName": "转塘",
+                "count": 13
+            }, {
+                "id": 6231,
+                "name": "万塘路",
+                "regionName": "万塘路",
+                "count": 1
+            }, {
+                "id": 6232,
+                "name": "教工路/学院路",
+                "regionName": "教工路/学院路",
+                "count": 37
+            }, {
+                "id": 12677,
+                "name": "小和山",
+                "regionName": "小和山",
+                "count": 48
+            }, {
+                "id": 14084,
+                "name": "留下",
+                "regionName": "留下",
+                "count": 23
+            }, {
+                "id": 32840,
+                "name": "虎跑",
+                "regionName": "虎跑",
+                "count": 15
+            }, {
+                "id": 32841,
+                "name": "雷峰塔",
+                "regionName": "雷峰塔",
+                "count": 15
+            }, {
+                "id": 32842,
+                "name": "九溪",
+                "regionName": "九溪",
+                "count": 13
+            }, {
+                "id": 32843,
+                "name": "杨公堤",
+                "regionName": "杨公堤",
+                "count": 49
+            }, {
+                "id": 32844,
+                "name": "宋城",
+                "regionName": "宋城",
+                "count": 17
+            }, {
+                "id": 32845,
+                "name": "美院象山",
+                "regionName": "美院象山",
+                "count": 54
+            }, {
+                "id": 32847,
+                "name": "汽车西站",
+                "regionName": "汽车西站",
+                "count": 11
+            }, {
+                "id": 32848,
+                "name": "古荡",
+                "regionName": "古荡",
+                "count": 85
+            }, {
+                "id": 33454,
+                "name": "青芝坞",
+                "regionName": "青芝坞",
+                "count": 45
+            }, {
+                "id": 33467,
+                "name": "四眼井",
+                "regionName": "四眼井",
+                "count": 20
+            }, {
+                "id": 33468,
+                "name": "满觉陇",
+                "regionName": "满觉陇",
+                "count": 17
+            }, {
+                "id": 37230,
+                "name": "303生活广场",
+                "regionName": "303生活广场",
+                "count": 2
+            }, {
+                "id": 37231,
+                "name": "古墩印象城购物中心",
+                "regionName": "古墩印象城购物中心",
+                "count": 9
+            }, {
+                "id": 37232,
+                "name": "五洲国际广场",
+                "regionName": "五洲国际广场",
+                "count": 9
+            }, {
+                "id": 37233,
+                "name": "铂澜大象城",
+                "regionName": "铂澜大象城",
+                "count": 5
+            }, {
+                "id": 37240,
+                "name": "高新文教区",
+                "regionName": "高新文教区",
+                "count": 674
+            }, {
+                "id": 37264,
+                "name": "三墩镇",
+                "regionName": "三墩镇",
+                "count": 281
+            }, {
+                "id": 37422,
+                "name": "首尔印象",
+                "regionName": "首尔印象",
+                "count": 13
+            }, {
+                "id": 37423,
+                "name": "象山国际",
+                "regionName": "象山国际",
+                "count": 18
+            }, {
+                "id": 37424,
+                "name": "金街美地",
+                "regionName": "金街美地",
+                "count": 50
+            }, {
+                "id": 37425,
+                "name": "三墩新天地香港城",
+                "regionName": "三墩新天地香港城",
+                "count": ""
+            }, {
+                "id": 37426,
+                "name": "浙大紫金港",
+                "regionName": "浙大紫金港",
+                "count": 2
+            }, {
+                "id": 37427,
+                "name": "文一路沿线",
+                "regionName": "文一路沿线",
+                "count": 15
+            }, {
+                "id": 37428,
+                "name": "西溪银泰城",
+                "regionName": "西溪银泰城",
+                "count": 27
+            }],
+            "60": [{
+                "id": 60,
+                "name": "全部",
+                "regionName": "滨江区",
+                "count": 1214
+            }, {
+                "id": 37185,
+                "name": "星耀城",
+                "regionName": "星耀城",
+                "count": 132
+            }, {
+                "id": 37186,
+                "name": "星光大道",
+                "regionName": "星光大道",
+                "count": 124
+            }, {
+                "id": 37187,
+                "name": "龙湖滨江天街",
+                "regionName": "龙湖滨江天街",
+                "count": 158
+            }, {
+                "id": 37188,
+                "name": "中赢康康谷",
+                "regionName": "中赢康康谷",
+                "count": 65
+            }, {
+                "id": 37189,
+                "name": "滨江宝龙城市广场",
+                "regionName": "滨江宝龙城市广场",
+                "count": 107
+            }, {
+                "id": 37190,
+                "name": "鑫都汇",
+                "regionName": "鑫都汇",
+                "count": 16
+            }, {
+                "id": 37191,
+                "name": "盒座社",
+                "regionName": "盒座社",
+                "count": 33
+            }, {
+                "id": 37192,
+                "name": "中赢国际",
+                "regionName": "中赢国际",
+                "count": 25
+            }, {
+                "id": 37193,
+                "name": "联庄",
+                "regionName": "联庄",
+                "count": 20
+            }, {
+                "id": 37211,
+                "name": "滨江高教园",
+                "regionName": "滨江高教园",
+                "count": 83
+            }],
+            "2779": [{
+                "id": 2779,
+                "name": "全部",
+                "regionName": "余杭区",
+                "count": 1824
+            }, {
+                "id": 8886,
+                "name": "临平",
+                "regionName": "临平",
+                "count": 137
+            }, {
+                "id": 8932,
+                "name": "塘栖",
+                "regionName": "塘栖",
+                "count": 57
+            }, {
+                "id": 13004,
+                "name": "五常",
+                "regionName": "五常",
+                "count": 235
+            }, {
+                "id": 13005,
+                "name": "仓前",
+                "regionName": "仓前",
+                "count": 172
+            }, {
+                "id": 13336,
+                "name": "闲林",
+                "regionName": "闲林",
+                "count": 29
+            }, {
+                "id": 17529,
+                "name": "西溪印象城",
+                "regionName": "西溪印象城",
+                "count": 18
+            }, {
+                "id": 20638,
+                "name": "崇贤",
+                "regionName": "崇贤",
+                "count": 78
+            }, {
+                "id": 25130,
+                "name": "永旺梦乐城",
+                "regionName": "永旺梦乐城",
+                "count": 43
+            }, {
+                "id": 25148,
+                "name": "西田城购物中心",
+                "regionName": "西田城购物中心",
+                "count": 23
+            }, {
+                "id": 37146,
+                "name": "金地广场",
+                "regionName": "金地广场",
+                "count": 8
+            }, {
+                "id": 37150,
+                "name": "临平万宝城购物中心",
+                "regionName": "临平万宝城购物中心",
+                "count": 47
+            }, {
+                "id": 37153,
+                "name": "上亿广场",
+                "regionName": "上亿广场",
+                "count": 33
+            }, {
+                "id": 37183,
+                "name": "君临广场",
+                "regionName": "君临广场",
+                "count": 4
+            }, {
+                "id": 37184,
+                "name": "乔司华荣城",
+                "regionName": "乔司华荣城",
+                "count": 19
+            }, {
+                "id": 37431,
+                "name": "华元西溪欢乐城",
+                "regionName": "华元西溪欢乐城",
+                "count": 31
+            }, {
+                "id": 37644,
+                "name": "和合广场购物中心",
+                "regionName": "和合广场购物中心",
+                "count": 24
+            }, {
+                "id": 37645,
+                "name": "余之城购物中心",
+                "regionName": "余之城购物中心",
+                "count": 71
+            }, {
+                "id": 37646,
+                "name": "星桥",
+                "regionName": "星桥",
+                "count": 39
+            }, {
+                "id": 37650,
+                "name": "乐慧购物中心",
+                "regionName": "乐慧购物中心",
+                "count": 26
+            }, {
+                "id": 37651,
+                "name": "临平老街",
+                "regionName": "临平老街",
+                "count": 117
+            }, {
+                "id": 37652,
+                "name": "乔司",
+                "regionName": "乔司",
+                "count": 45
+            }, {
+                "id": 37653,
+                "name": "老余杭",
+                "regionName": "老余杭",
+                "count": 162
+            }, {
+                "id": 38364,
+                "name": "临平华元欢乐城购物中心",
+                "regionName": "临平华元欢乐城购物中心",
+                "count": 22
+            }, {
+                "id": 38535,
+                "name": "良渚",
+                "regionName": "良渚",
+                "count": 106
+            }, {
+                "id": 39218,
+                "name": "仁和园区",
+                "regionName": "仁和园区",
+                "count": 8
+            }],
+            "2780": [{
+                "id": 2780,
+                "name": "全部",
+                "regionName": "临安市",
+                "count": 315
+            }, {
+                "id": 13517,
+                "name": "人民广场",
+                "regionName": "人民广场",
+                "count": 6
+            }, {
+                "id": 13519,
+                "name": "东站",
+                "regionName": "东站",
+                "count": 8
+            }, {
+                "id": 13521,
+                "name": "城中街",
+                "regionName": "城中街",
+                "count": 48
+            }, {
+                "id": 13523,
+                "name": "钱王街",
+                "regionName": "钱王街",
+                "count": 23
+            }, {
+                "id": 13525,
+                "name": "新民街",
+                "regionName": "新民街",
+                "count": 18
+            }, {
+                "id": 13529,
+                "name": "衣锦街",
+                "regionName": "衣锦街",
+                "count": 13
+            }, {
+                "id": 13531,
+                "name": "锦北街道",
+                "regionName": "锦北街道",
+                "count": 7
+            }, {
+                "id": 13533,
+                "name": "青山湖景区",
+                "regionName": "青山湖景区",
+                "count": 8
+            }, {
+                "id": 13535,
+                "name": "平山/农林大学",
+                "regionName": "平山/农林大学",
+                "count": 25
+            }, {
+                "id": 13537,
+                "name": "玲珑山附近",
+                "regionName": "玲珑山附近",
+                "count": 11
+            }, {
+                "id": 13936,
+                "name": "万华广场",
+                "regionName": "万华广场",
+                "count": 10
+            }, {
+                "id": 15214,
+                "name": "石镜街",
+                "regionName": "石镜街",
+                "count": 22
+            }, {
+                "id": 15216,
+                "name": "黄金水岸",
+                "regionName": "黄金水岸",
+                "count": 3
+            }, {
+                "id": 15218,
+                "name": "昌化镇",
+                "regionName": "昌化镇",
+                "count": 14
+            }, {
+                "id": 15220,
+                "name": "西苑路",
+                "regionName": "西苑路",
+                "count": 5
+            }, {
+                "id": 15222,
+                "name": "锦江路",
+                "regionName": "锦江路",
+                "count": 13
+            }, {
+                "id": 15224,
+                "name": "太湖源",
+                "regionName": "太湖源",
+                "count": 6
+            }, {
+                "id": 15226,
+                "name": "临东路",
+                "regionName": "临东路",
+                "count": ""
+            }, {
+                "id": 15228,
+                "name": "青山",
+                "regionName": "青山",
+                "count": 10
+            }, {
+                "id": 15230,
+                "name": "天目山景区",
+                "regionName": "天目山景区",
+                "count": 1
+            }, {
+                "id": 15237,
+                "name": "龙岗镇",
+                "regionName": "龙岗镇",
+                "count": 5
+            }, {
+                "id": 26129,
+                "name": "高虹镇",
+                "regionName": "高虹镇",
+                "count": 4
+            }, {
+                "id": 26131,
+                "name": "於潜镇",
+                "regionName": "於潜镇",
+                "count": 8
+            }, {
+                "id": 32234,
+                "name": "清凉峰",
+                "regionName": "清凉峰",
+                "count": ""
+            }, {
+                "id": 36891,
+                "name": "大明山风景区",
+                "regionName": "大明山风景区",
+                "count": 3
+            }, {
+                "id": 37127,
+                "name": "湍口镇",
+                "regionName": "湍口镇",
+                "count": 2
+            }],
+            "2781": [{
+                "id": 2781,
+                "name": "全部",
+                "regionName": "富阳区",
+                "count": 451
+            }, {
+                "id": 13706,
+                "name": "儿童公园",
+                "regionName": "儿童公园",
+                "count": 2
+            }, {
+                "id": 13723,
+                "name": "世纪联华",
+                "regionName": "世纪联华",
+                "count": 5
+            }, {
+                "id": 13746,
+                "name": "东方茂",
+                "regionName": "东方茂",
+                "count": 68
+            }, {
+                "id": 13754,
+                "name": "银泰城",
+                "regionName": "银泰城",
+                "count": 41
+            }, {
+                "id": 13765,
+                "name": "龙山路/青少年宫",
+                "regionName": "龙山路/青少年宫",
+                "count": 16
+            }, {
+                "id": 13767,
+                "name": "东南商贸中心",
+                "regionName": "东南商贸中心",
+                "count": 10
+            }, {
+                "id": 13780,
+                "name": "大润发商贸城",
+                "regionName": "大润发商贸城",
+                "count": 12
+            }, {
+                "id": 15748,
+                "name": "杭科院",
+                "regionName": "杭科院",
+                "count": 12
+            }, {
+                "id": 17653,
+                "name": "新登镇",
+                "regionName": "新登镇",
+                "count": 23
+            }, {
+                "id": 27081,
+                "name": "富春桃源通天飞瀑景区沿线",
+                "regionName": "富春桃源通天飞瀑景区沿线",
+                "count": ""
+            }, {
+                "id": 27101,
+                "name": "龙门古镇",
+                "regionName": "龙门古镇",
+                "count": 2
+            }, {
+                "id": 27244,
+                "name": "汤青山驾校考场沿线",
+                "regionName": "汤青山驾校考场沿线",
+                "count": 1
+            }, {
+                "id": 27250,
+                "name": "新桐乡烟雨桐洲",
+                "regionName": "新桐乡烟雨桐洲",
+                "count": ""
+            }, {
+                "id": 27264,
+                "name": "新沙岛",
+                "regionName": "新沙岛",
+                "count": 6
+            }, {
+                "id": 31744,
+                "name": "机动车考试中心",
+                "regionName": "机动车考试中心",
+                "count": ""
+            }, {
+                "id": 33269,
+                "name": "灵山风景区",
+                "regionName": "灵山风景区",
+                "count": ""
+            }, {
+                "id": 33271,
+                "name": "野生动物园",
+                "regionName": "野生动物园",
+                "count": 1
+            }, {
+                "id": 33274,
+                "name": "富阳城市森林公园",
+                "regionName": "富阳城市森林公园",
+                "count": ""
+            }, {
+                "id": 33518,
+                "name": "富阳客运站",
+                "regionName": "富阳客运站",
+                "count": ""
+            }, {
+                "id": 33693,
+                "name": "富阳汽车客运南站",
+                "regionName": "富阳汽车客运南站",
+                "count": 2
+            }, {
+                "id": 33695,
+                "name": "富阳百货大楼",
+                "regionName": "富阳百货大楼",
+                "count": 1
+            }, {
+                "id": 33697,
+                "name": "富阳城东客运站",
+                "regionName": "富阳城东客运站",
+                "count": ""
+            }, {
+                "id": 33699,
+                "name": "郁达夫公园",
+                "regionName": "郁达夫公园",
+                "count": ""
+            }, {
+                "id": 33701,
+                "name": "富阳场口客运站",
+                "regionName": "富阳场口客运站",
+                "count": 1
+            }, {
+                "id": 34078,
+                "name": "富阳医院",
+                "regionName": "富阳医院",
+                "count": 4
+            }, {
+                "id": 34080,
+                "name": "老年医院",
+                "regionName": "老年医院",
+                "count": ""
+            }, {
+                "id": 34082,
+                "name": "富宝山园",
+                "regionName": "富宝山园",
+                "count": ""
+            }, {
+                "id": 34084,
+                "name": "富阳市大源人民医院",
+                "regionName": "富阳市大源人民医院",
+                "count": 1
+            }, {
+                "id": 37950,
+                "name": "宝龙城市广场",
+                "regionName": "宝龙城市广场",
+                "count": 19
+            }, {
+                "id": 38971,
+                "name": "体育场路",
+                "regionName": "体育场路",
+                "count": 1
+            }, {
+                "id": 39003,
+                "name": "文教路",
+                "regionName": "文教路",
+                "count": 18
+            }, {
+                "id": 39073,
+                "name": "大桥路沿线",
+                "regionName": "大桥路沿线",
+                "count": ""
+            }, {
+                "id": 39322,
+                "name": "兴达路沿线",
+                "regionName": "兴达路沿线",
+                "count": 6
+            }, {
+                "id": 39369,
+                "name": "江滨西大道",
+                "regionName": "江滨西大道",
+                "count": 3
+            }],
+            "2782": [{
+                "id": 2782,
+                "name": "全部",
+                "regionName": "建德市",
+                "count": 93
+            }, {
+                "id": 15362,
+                "name": "老广场",
+                "regionName": "老广场",
+                "count": 20
+            }, {
+                "id": 15364,
+                "name": "新广场",
+                "regionName": "新广场",
+                "count": 16
+            }, {
+                "id": 17943,
+                "name": "市府",
+                "regionName": "市府",
+                "count": 8
+            }, {
+                "id": 17945,
+                "name": "金马中心",
+                "regionName": "金马中心",
+                "count": 11
+            }, {
+                "id": 27090,
+                "name": "中山路沿线",
+                "regionName": "中山路沿线",
+                "count": ""
+            }, {
+                "id": 27118,
+                "name": "新叶古村",
+                "regionName": "新叶古村",
+                "count": ""
+            }, {
+                "id": 27487,
+                "name": "乾潭镇",
+                "regionName": "乾潭镇",
+                "count": 2
+            }, {
+                "id": 30721,
+                "name": "梅城镇",
+                "regionName": "梅城镇",
+                "count": 5
+            }, {
+                "id": 30723,
+                "name": "新安东路",
+                "regionName": "新安东路",
+                "count": 1
+            }, {
+                "id": 32824,
+                "name": "建德汽车南站",
+                "regionName": "建德汽车南站",
+                "count": ""
+            }, {
+                "id": 32830,
+                "name": "汽车东站",
+                "regionName": "汽车东站",
+                "count": ""
+            }, {
+                "id": 33368,
+                "name": "南山公园",
+                "regionName": "南山公园",
+                "count": 1
+            }, {
+                "id": 33379,
+                "name": "建德大桥",
+                "regionName": "建德大桥",
+                "count": 6
+            }, {
+                "id": 33474,
+                "name": "寿昌镇",
+                "regionName": "寿昌镇",
+                "count": 2
+            }, {
+                "id": 33477,
+                "name": "杨村桥镇",
+                "regionName": "杨村桥镇",
+                "count": ""
+            }, {
+                "id": 33480,
+                "name": "大同镇",
+                "regionName": "大同镇",
+                "count": ""
+            }],
+            "2783": [{
+                "id": 2783,
+                "name": "全部",
+                "regionName": "桐庐县",
+                "count": 188
+            }, {
+                "id": 24745,
+                "name": "瑶琳路沿线",
+                "regionName": "瑶琳路沿线",
+                "count": 20
+            }, {
+                "id": 24746,
+                "name": "大润发/中心广场",
+                "regionName": "大润发/中心广场",
+                "count": 17
+            }, {
+                "id": 24747,
+                "name": "景文百货及周边",
+                "regionName": "景文百货及周边",
+                "count": 5
+            }, {
+                "id": 24748,
+                "name": "滨江路",
+                "regionName": "滨江路",
+                "count": 4
+            }, {
+                "id": 24749,
+                "name": "朝霞美食街",
+                "regionName": "朝霞美食街",
+                "count": 2
+            }, {
+                "id": 24750,
+                "name": "江北新世纪",
+                "regionName": "江北新世纪",
+                "count": 8
+            }, {
+                "id": 24751,
+                "name": "江北",
+                "regionName": "江北",
+                "count": 10
+            }, {
+                "id": 33193,
+                "name": "博物馆",
+                "regionName": "博物馆",
+                "count": 2
+            }, {
+                "id": 33198,
+                "name": "客运中心",
+                "regionName": "客运中心",
+                "count": 1
+            }, {
+                "id": 33828,
+                "name": "乔林路",
+                "regionName": "乔林路",
+                "count": 5
+            }, {
+                "id": 33830,
+                "name": "大奇山森林公园",
+                "regionName": "大奇山森林公园",
+                "count": ""
+            }, {
+                "id": 33832,
+                "name": "第一人民医院",
+                "regionName": "第一人民医院",
+                "count": 3
+            }, {
+                "id": 37729,
+                "name": "利时百货",
+                "regionName": "利时百货",
+                "count": 11
+            }, {
+                "id": 37730,
+                "name": "富春江景区",
+                "regionName": "富春江景区",
+                "count": 6
+            }],
+            "2784": [{
+                "id": 2784,
+                "name": "全部",
+                "regionName": "淳安县",
+                "count": 348
+            }, {
+                "id": 16308,
+                "name": "湖滨公园",
+                "regionName": "湖滨公园",
+                "count": 16
+            }, {
+                "id": 16309,
+                "name": "千岛湖广场",
+                "regionName": "千岛湖广场",
+                "count": 22
+            }, {
+                "id": 16310,
+                "name": "江滨公园",
+                "regionName": "江滨公园",
+                "count": 7
+            }, {
+                "id": 16311,
+                "name": "千岛湖大排档",
+                "regionName": "千岛湖大排档",
+                "count": 18
+            }, {
+                "id": 16312,
+                "name": "千岛湖绿城度假公寓",
+                "regionName": "千岛湖绿城度假公寓",
+                "count": 23
+            }, {
+                "id": 16313,
+                "name": "阳光路",
+                "regionName": "阳光路",
+                "count": 26
+            }, {
+                "id": 16314,
+                "name": "千岛湖森林氧吧",
+                "regionName": "千岛湖森林氧吧",
+                "count": 6
+            }, {
+                "id": 16315,
+                "name": "千岛湖十字街",
+                "regionName": "千岛湖十字街",
+                "count": 22
+            }, {
+                "id": 16316,
+                "name": "明珠花园",
+                "regionName": "明珠花园",
+                "count": 22
+            }, {
+                "id": 17910,
+                "name": "开发区",
+                "regionName": "开发区",
+                "count": 18
+            }, {
+                "id": 32543,
+                "name": "千岛湖水下古城",
+                "regionName": "千岛湖水下古城",
+                "count": 9
+            }, {
+                "id": 37559,
+                "name": "鱼街",
+                "regionName": "鱼街",
+                "count": 38
+            }, {
+                "id": 38426,
+                "name": "千岛湖风景区",
+                "regionName": "千岛湖风景区",
+                "count": 9
+            }],
+            "5225": [{
+                "id": 5225,
+                "name": "全部",
+                "regionName": "萧山区",
+                "count": 1727
+            }, {
+                "id": 5226,
+                "name": "城厢",
+                "regionName": "城厢",
+                "count": 107
+            }, {
+                "id": 5227,
+                "name": "北干",
+                "regionName": "北干",
+                "count": 154
+            }, {
+                "id": 5473,
+                "name": "闻堰",
+                "regionName": "闻堰",
+                "count": 45
+            }, {
+                "id": 5474,
+                "name": "萧山经济开发区",
+                "regionName": "萧山经济开发区",
+                "count": 104
+            }, {
+                "id": 6233,
+                "name": "加州阳光",
+                "regionName": "加州阳光",
+                "count": 77
+            }, {
+                "id": 6234,
+                "name": "恒隆广场",
+                "regionName": "恒隆广场",
+                "count": 60
+            }, {
+                "id": 6235,
+                "name": "市心南路",
+                "regionName": "市心南路",
+                "count": 84
+            }, {
+                "id": 6236,
+                "name": "通惠路沿线",
+                "regionName": "通惠路沿线",
+                "count": 66
+            }, {
+                "id": 6237,
+                "name": "湘湖",
+                "regionName": "湘湖",
+                "count": 40
+            }, {
+                "id": 9084,
+                "name": "瓜沥镇",
+                "regionName": "瓜沥镇",
+                "count": 114
+            }, {
+                "id": 9168,
+                "name": "临浦",
+                "regionName": "临浦",
+                "count": 107
+            }, {
+                "id": 12111,
+                "name": "国际机场",
+                "regionName": "国际机场",
+                "count": 78
+            }, {
+                "id": 12442,
+                "name": "义蓬",
+                "regionName": "义蓬",
+                "count": 98
+            }, {
+                "id": 13101,
+                "name": "高教园",
+                "regionName": "高教园",
+                "count": 4
+            }, {
+                "id": 15449,
+                "name": "鸿兴城巧克力公馆",
+                "regionName": "鸿兴城巧克力公馆",
+                "count": 19
+            }, {
+                "id": 17147,
+                "name": "旺角城/银隆百货",
+                "regionName": "旺角城/银隆百货",
+                "count": 124
+            }, {
+                "id": 25736,
+                "name": "宝龙城市广场",
+                "regionName": "宝龙城市广场",
+                "count": 46
+            }, {
+                "id": 32855,
+                "name": "奥体中心",
+                "regionName": "奥体中心",
+                "count": 68
+            }, {
+                "id": 32856,
+                "name": "钱江世纪城",
+                "regionName": "钱江世纪城",
+                "count": 121
+            }, {
+                "id": 32860,
+                "name": "萧山高教园",
+                "regionName": "萧山高教园",
+                "count": 34
+            }, {
+                "id": 32866,
+                "name": "新农都",
+                "regionName": "新农都",
+                "count": 36
+            }, {
+                "id": 32867,
+                "name": "衙前",
+                "regionName": "衙前",
+                "count": 6
+            }, {
+                "id": 32868,
+                "name": "南阳河庄",
+                "regionName": "南阳河庄",
+                "count": 29
+            }, {
+                "id": 32869,
+                "name": "花木城",
+                "regionName": "花木城",
+                "count": ""
+            }, {
+                "id": 32870,
+                "name": "所前镇",
+                "regionName": "所前镇",
+                "count": 11
+            }, {
+                "id": 32871,
+                "name": "蜀山街道",
+                "regionName": "蜀山街道",
+                "count": 28
+            }]
+        }
 
-	}
-	res = get_cookie()
-	cookie = res[1]
-	uuid = {i.split("=")[0]:i.split("=")[1] for i in cookie.split("; ")}["uuid"]
-	ua = res[2]
-	datas = a['areaObj']
-	b = datas.values()
-	area_list = []
-	for data in b:
-		for d in data[1:]:
-			area_list.append(d)  # 将每个区域信息保存到列表，元素是字典
-	l = 0
-	# print(len(area_list))
-	old = time.time()
-	for i in area_list[10:]:
-		# print(i)
-		l += 1
-		print('开始抓取第%d个区域：' % l, i['regionName'], '店铺总数：', i['count'])
-		# if i['regionName'] == "回龙观":
-		#     print(area_list.index(i))
-		try:
-			# pass
-			aa=crow_id(i['id'],cookie,uuid,ua)
-			if aa:
-				now = time.time() - old
-				print(i['name'], '抓取完成！', '时间:%d' % now)
-			else:
-				res = get_cookie(1)
-				cookie = res[1]
-				uuid = {i.split("=")[0]: i.split("=")[1] for i in cookie.split("; ")}["uuid"]
-				ua = res[2]
-		except Exception as e:
-			print(e)
+    }
+    res = get_cookie()
+    cookie = res[1]
+    uuid = {i.split("=")[0]: i.split("=")[1] for i in cookie.split("; ")}["uuid"]
+    ua = res[2]
+    datas = a['areaObj']
+    b = datas.values()
+    area_list = []
+    for data in b:
+        for d in data[1:]:
+            area_list.append(d)  # 将每个区域信息保存到列表，元素是字典
+    l = 0
+    # print(len(area_list))
+    old = time.time()
+
+    for i in area_list:
+        # print(i)
+
+        l += 1
+        print('开始抓取第%d个区域：' % l, i['regionName'], '店铺总数：', i['count'])
+        # if i['regionName'] == "回龙观":
+        #     print(area_list.index(i))
+        try:
+            # pass
+            aa = crow_id(i['id'], cookie, uuid, ua)
+            if aa:
+                now = time.time() - old
+                print(i['name'], '抓取完成！', '时间:%d' % now)
+            else:
+                res = get_cookie(1)
+                cookie = res[1]
+                uuid = {i.split("=")[0]: i.split("=")[1] for i in cookie.split("; ")}["uuid"]
+                ua = res[2]
+        except Exception as e:
+            print(e)

@@ -10,7 +10,7 @@ import json
 from lxml import etree
 from getip import getip
 import randphoneua
-ci='10'
+ci='50'
 # 返回一个ip和对应的cookie，cookie以字符串形式返回。ip需要经过测试
 def get_cookie(refalsh=0):
     mark = 0
@@ -34,7 +34,7 @@ def get_cookie(refalsh=0):
         driver = webdriver.Chrome(options=chrome_options)
         # driver.set_page_load_timeout(8)  # 设置超时
         # driver.set_script_timeout(8)
-        url = 'https://i.meituan.com/shanghai/'  # 美团深圳首页
+        url = 'https://i.meituan.com/hangzhou/'  # 美团深圳首页
         url2 = 'https://meishi.meituan.com/i/?ci='+ci+'&stid_b=1&cevent=imt%2Fhomepage%2Fcategory1%2F1'  # 美食页面
         try:
             driver.get(url)
@@ -53,7 +53,7 @@ def get_cookie(refalsh=0):
             js = 'var q=document.documentElement.scrollTop=100'
             driver.execute_script(js)
             time.sleep(1)
-            url3 = driver.find_element_by_xpath("//div[@class='list']/a[1]").get_attribute("href")
+            url3 = driver.find_element_by_xpath("//div[@class='list']/a[2]").get_attribute("href")
             driver.get(url3)
             # actions.click(dta).perform()
 
@@ -81,7 +81,7 @@ def get_cookie(refalsh=0):
                 co = '; '.join(item for item in [item["name"] + "=" + item["value"] for item in c])
 
                 print(co)
-                return (p,co,ua)
+                return (p,co,uas)
             else:
                 print('缺少Cookie,长度：', len(c))
 
@@ -98,7 +98,7 @@ def parse(u, pc, m, n, ll, ttt):
     mesg = 'Thread:' + str(n) + ' No:' + str(m) + ' Time:' + str(ttt) + ' left:' + str(ll)  # 记录当前线程爬取的信息
     url = u[0]
     cate = u[1]
-    id  = u[2]
+    id = u[2]
     p = pc[0]
     ua = pc[2]
     cookie = pc[1]
@@ -110,12 +110,12 @@ def parse(u, pc, m, n, ll, ttt):
             'Cache-Control': 'no-cache',
             'Connection': 'keep-alive',
             'Upgrade-Insecure-Requests': '1',
-            'Pragma':'no-cache',
+            'Pragma': 'no-cache',
             'Referer': 'https://meishi.meituan.com/i/?ci='+ci+'&stid_b=1&cevent=imt%2Fhomepage%2Fcategory1%2F1',
             'User-Agent': ua,
-            'Sec-Fetch-Mode':'navigate',
-            'Sec-Fetch-Site':'same-site',
-            'Sec-Fetch-User':'?1'
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'same-site',
+            'Sec-Fetch-User': '?1'
 
             }
     cookies = {i.split("=")[0]:i.split("=")[1] for i in cookie.split("; ")}
@@ -153,7 +153,7 @@ def parse(u, pc, m, n, ll, ttt):
 
             except:
                 pass
-    except Exception  as e:
+    except Exception as e:
         print('Error  Thread:', n)  # 打印出异常的线程号
         print(e)
         s = str(e)[-22:-6]
