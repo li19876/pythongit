@@ -53,7 +53,7 @@ def get_cookie(refalsh=0):
             js = 'var q=document.documentElement.scrollTop=100'
             driver.execute_script(js)
             time.sleep(1)
-            url3 = driver.find_element_by_xpath("//div[@class='list']/a[2]").get_attribute("href")
+            url3 = driver.find_element_by_xpath("//div[@class='list']/a[5]").get_attribute("href")
             driver.get(url3)
             # actions.click(dta).perform()
 

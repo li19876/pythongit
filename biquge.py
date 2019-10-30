@@ -5,16 +5,14 @@ import threading
 from fake_useragent import UserAgent
 import os
 def getres(url):
-    cookie= "Hm_lvt_26d46b595160a7e381140f019cd1af0f=1567069220; Hm_lpvt_26d46b595160a7e381140f019cd1af0f=1567069220; PHPSESSID=7p057fqafdco0k09n0ig78u0l2"
-    cookies= {i.split("=")[0]: i.split("=")[1] for i in cookie.split("; ")}
     ua = UserAgent()
     # print("访问url",url)
     headers={"User-Agent": ua.random,
-            "referer":"https://www.5atxt.com/0_233/",
+            "referer":"https://www.5atxt.com/0_841/",
              "Host":"www.5atxt.com"
              }
     while 1:
-        res = requests.get(url,headers=headers,cookies=cookies)
+        res = requests.get(url,headers=headers)
         if res.status_code ==200:
         # print(res.text)
             return res
@@ -50,7 +48,7 @@ def parse(urllist,l,i):
         lock.release()
         time.sleep(1.5)
 # return {"content":content,"title":title}
-def run(mulu="https://www.5atxt.com/0_233/"):
+def run(mulu="https://www.5atxt.com/0_841/"):
     # mulu = "http://www.biquw.com/book/86119/"
     res=getres(mulu)
     html = etree.HTML(res.text.encode(res.encoding).decode(res.apparent_encoding))
