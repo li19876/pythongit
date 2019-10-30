@@ -75,8 +75,7 @@ def savefile(res):
         # print("写入了:{}".format((res["gsname"]+" "+res["frname"]+" "+res["phone"]+"\n")))
 
 
-def run(
-        cookie='TYCID=f2564d2097f311e9b4169345e5b2d504; undefined=f2564d2097f311e9b4169345e5b2d504; ssuid=4261586970; _ga=GA1.2.238743067.1561540964; jsid=SEM-BAIDU-PZ1907-SY-000000; aliyungf_tc=AQAAAD3iO0l9lwAAvn4varh2ubXdBBOr; csrfToken=syR0e5uZ-4FlifUt0Si3QfIo; bannerFlag=undefined; _gid=GA1.2.1313374884.1562747826; Hm_lvt_e92c8d65d92d534b0fc290df538b4758=1562644008,1562652285,1562747826,1562809283; token=3450b62648a0404ca545ebe8fedfa382; _utm=f444aaa0aa214e9a933253f16f14d4d3; tyc-user-info=%257B%2522claimEditPoint%2522%253A%25220%2522%252C%2522myAnswerCount%2522%253A%25220%2522%252C%2522myQuestionCount%2522%253A%25220%2522%252C%2522signUp%2522%253A%25220%2522%252C%2522explainPoint%2522%253A%25220%2522%252C%2522privateMessagePointWeb%2522%253A%25220%2522%252C%2522nickname%2522%253A%2522%25E9%2599%2588%25E7%25BE%258E%2522%252C%2522integrity%2522%253A%25220%2525%2522%252C%2522privateMessagePoint%2522%253A%25220%2522%252C%2522state%2522%253A0%252C%2522announcementPoint%2522%253A%25220%2522%252C%2522isClaim%2522%253A%25220%2522%252C%2522vipManager%2522%253A%25220%2522%252C%2522discussCommendCount%2522%253A%25220%2522%252C%2522monitorUnreadCount%2522%253A%2522312%2522%252C%2522onum%2522%253A%25220%2522%252C%2522claimPoint%2522%253A%25220%2522%252C%2522token%2522%253A%2522eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxODIwMjYxMDI0MCIsImlhdCI6MTU2MjgwOTMzMiwiZXhwIjoxNTk0MzQ1MzMyfQ.AdYI2pTQ4Ky8HL3gLwZqP0ui9VxlRjXJMb1iecax_I3Z6Asc2cik3_w9rFqf7LjFOzZRAnHR9Y-OoQnfHVT8KQ%2522%252C%2522pleaseAnswerCount%2522%253A%25220%2522%252C%2522redPoint%2522%253A%25220%2522%252C%2522bizCardUnread%2522%253A%25220%2522%252C%2522vnum%2522%253A%25220%2522%252C%2522mobile%2522%253A%252218202610240%2522%257D; auth_token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxODIwMjYxMDI0MCIsImlhdCI6MTU2MjgwOTMzMiwiZXhwIjoxNTk0MzQ1MzMyfQ.AdYI2pTQ4Ky8HL3gLwZqP0ui9VxlRjXJMb1iecax_I3Z6Asc2cik3_w9rFqf7LjFOzZRAnHR9Y-OoQnfHVT8KQ; cloud_token=b65854bbcdf24b97ad1b6f12478a26ab; Hm_lpvt_e92c8d65d92d534b0fc290df538b4758=1562810689; _gat_gtag_UA_123487620_1=1'):
+def run(cookie):
     encoding = getencoding("公司名列表.txt")
     with open("公司名列表.txt", "r", encoding=encoding) as fp:
         gslist = [i.strip() for i in fp]
@@ -86,8 +85,10 @@ def run(
             start = time.time()
             res = parsed(keyword=gs, cookie=cookie)
             if isinstance(res, int):
-                print("请输入验证码后重新运行")
-                exit()
+                while True:
+                    boo=e.boolbox("请到天眼查输入验证码,验证完成后点击yes!")
+                    if boo:
+                        break
             savefile(res)
             gslist.remove(gs)
             end = time.time()
@@ -110,11 +111,12 @@ def getencoding(file):
 
 if __name__ == '__main__':
     # print(getencoding("公司名列表.txt"))
-    # cookie=input("请输入cookie:")
-    # if cookie =="":
-    #     run()
-    # else:
-    #     run(cookie)
+    with open("./cook.txt",'r',encoding=getencoding("cook.txt")) as f:
+        cookie = f.read()
+    if cookie == "":
+        e.msgbox("请输入cookie后运行!")
+    else:
+        run(cookie)
     # parsed("北京皓智顺然")
-    a = e.boolbox("是否验证完成?")
-    print(a)
+    # a = e.boolbox("是否验证完成?")
+    # print(a)
