@@ -2,6 +2,7 @@ import easygui as e
 import getencoding
 import os
 
+
 def run():
     print("请在弹窗中选择要分割的文件!")
     filepath = e.fileopenbox()
@@ -35,6 +36,8 @@ def run():
                 for v in s:
                     fp.write(v)
         print("分割完成")
+
+
 if __name__=='__main__':
     while 1:
         run()
