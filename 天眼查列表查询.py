@@ -13,8 +13,8 @@ ua = UserAgent()
 db =pymysql.connect(host="localhost",port=3306,user="root",password="li123456..",db='lys',charset="utf8")
 curosr = db.cursor()
 
-#获取响应
-#参数为要查询的公司名
+# 获取响应
+# 参数为要查询的公司名
 def getres(keyword= "北京皓智顺然",page=1):
 
     url ="https://www.tianyancha.com/search/ohp1/p{}?key={}".format(page,keyword)
@@ -85,7 +85,7 @@ def yanzheng(cookie,url):
     imgdata = open('img.png', 'rb').read()
     res = client.recv_byte(imgdata)
 
-    if res == False:
+    if not res:
         print(res[u'imgId'])
         client.report_err(res[u'imgId'])
         print("识别识别,已提交报错")
@@ -149,14 +149,14 @@ def parsed(keyword,page):
         # print(response.text)
         result = []
         for gs in lxlist:
-            phone1 = gs.xpath('string(.//div/span[2]/span)')#一个的号码
-            phone2 = gs.xpath('.//div[1]/script/text()')#隐藏的多个号码
-            email1 = gs.xpath('string(.//div[2]/span[2])')#邮箱
-            email2 = gs.xpath('.//div[2]/script/text()')#隐藏的邮箱
-            gsname = gs.xpath('string(.//../div[@class="header"]/a)')#公司名称
-            frname = gs.xpath('string(.//../div[@class="info row text-ellipsis"]/div/a)')#法人名称
-            city = gs.xpath('.//../../span[@class="site"]/text()')#城市
-            if city != []:
+            phone1 = gs.xpath('string(.//div/span[2]/span)')  # 一个的号码
+            phone2 = gs.xpath('.//div[1]/script/text()')  # 隐藏的多个号码
+            email1 = gs.xpath('string(.//div[2]/span[2])')  # 邮箱
+            email2 = gs.xpath('.//div[2]/script/text()')  # 隐藏的邮箱
+            gsname = gs.xpath('string(.//../div[@class="header"]/a)')  # 公司名称
+            frname = gs.xpath('string(.//../div[@class="info row text-ellipsis"]/div/a)')  # 法人名称
+            city = gs.xpath('.//../../span[@class="site"]/text()')  # 城市
+            if city:
                 city = city[0]
             else:
                 city = ""
@@ -168,7 +168,7 @@ def parsed(keyword,page):
 
             #企业状态
             qyzt = gs.xpath('.//../div[@class="header"]/div/text()')
-            if qyzt != []:
+            if qyzt:
                 qyzt = qyzt[0]
             else:
                 qyzt= ''
@@ -176,7 +176,7 @@ def parsed(keyword,page):
             jyfw = gs.xpath('string(.//../div[@class="match row text-ellipsis"])')
 
             # print(phone2)
-            if phone2 != []:
+            if phone2:
                 phone = eval(phone2[0])
                 listphone = list(filter(lambda a: len(a) == 11, phone))
                 phone = ",".join(listphone)
@@ -184,7 +184,7 @@ def parsed(keyword,page):
                 phone = phone1
             else:
                 phone = ""
-            if email2 != []:
+            if email2:
                 email = email2[0].replace("[", "").replace("]", "").replace('"', "")
             else:
                 email = email1
@@ -217,7 +217,7 @@ def run(num,keyword):
         # exit()
     for key in keylist:
         pagenum = getpagenum(key)
-        if pagenum != None:
+        if pagenum is not None:
             for page in range(num if key == keyword else 1,pagenum+1):
                 ress = parsed(key,page)
                 if ress == 400:

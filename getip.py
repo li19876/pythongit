@@ -71,5 +71,42 @@ def getnew():
             print(str(e))
             time.sleep(2)
 
+def getmore():
+    url = 'http://route.xiongmaodaili.com/xiongmao-web/api/glip?secret=23225551106b6bfd49129dcc97f0c91b&orderNo=GL20190620165705pPDVsNCm&count=10&isTxt=1&proxyType=1'
+    res = requests.get(url).text
+    res = res.split('\n')[:-1]
+    now = int(time.time())
+    for i in res:
+        insert = """
+                 insert into proxies_copy(ip,guoqitime) values ('{}','{}')
+                 """.format(i, now + 300)
+        curosr.execute(insert)
+    try:
+        db.commit()
+        print("获取成功")
+    except Exception as e:
+        print(str(e))
+
+def getone():
+    now = int(time.time())
+    beforehour = now - 3600
+    select = """
+                    select id,ip from proxies_copy where guoqitime < {} and guoqitime > {}
+                """.format(now + 300, beforehour)
+    curosr.execute(select)
+    ip=curosr.fetchone()
+    if ip is None:
+        getmore()
+        now = int(time.time())
+        beforehour = now - 3600
+        select = """
+                            select id,ip from proxies_copy where guoqitime < {} and guoqitime > {}
+                        """.format(now + 300, beforehour)
+        curosr.execute(select)
+        ip = curosr.fetchone()
+    dele = 'delete from proxies_copy where id = "{}"'.format(ip[0])
+    curosr.execute(dele)
+    db.commit()
+    return ip[1][:-1]
 if __name__ == '__main__':
-    getnew()
+    print(getone())
