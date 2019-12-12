@@ -5,8 +5,8 @@ from biquge.items import BiqugeItem
 
 class XiaoshuoSpider(scrapy.Spider):
 	name = 'xiaoshuo'
-	allowed_domains = ['www.bxwx.la','www.5atxt.com','www.qu.la']
-	start_urls = ['https://www.bxwx.la/b/42/42715/']
+	allowed_domains = ['www.bxwx.la','www.5atxt.com','www.jx.la','www.xiaoshuo240.cn','www.biquge.tw','www.xbiquge6.com']
+	start_urls = ['https://www.5atxt.com/0_739/']
 
 	def parse(self, response):
 		bookname = response.xpath('//div[@id="info"]/h1/text()').get()
