@@ -24,13 +24,9 @@ def getip(refalsh=0):
         return ip
     else:
         try:
-            re = requests.get("http://icanhazip.com", proxies={"http": ss[0][1]},timeout=(3,10))
+            # re = requests.get("http://icanhazip.com", proxies={"http": ss[0][1]},timeout=(3,10))
             print("返回一个数据库的ip")
             return ss[0][1]
-        except TimeoutError:
-            print("数据库ip链接超时,获取新ip")
-            ip=getnew()
-            return ip
         except Exception as e:
             print("获取数据库ip时发生错误",str(e))
             ip=getnew()
@@ -109,4 +105,4 @@ def getone():
     db.commit()
     return ip[1][:-1]
 if __name__ == '__main__':
-    print(getone())
+    print(getip())

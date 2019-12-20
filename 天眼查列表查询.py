@@ -65,56 +65,58 @@ def getres(keyword= "北京皓智顺然",page=1):
 def yanzheng(cookie,url):
     cookies = {i.split("=")[0]: i.split("=")[1] for i in cookie.split("; ")}
     chrome = webdriver.Chrome()
-    chrome.set_window_size(500, 500)
+    chrome.set_window_size(1000, 800)
     chrome.get("http://www.tianyancha.com")  # 先get一下后面才能加cookie
     for i in cookies:
         chrome.add_cookie({"name": i, "value": cookies[i]})
     chrome.get(url)
     for i in cookies:
         chrome.add_cookie({"name": i, "value": cookies[i]})
-    ele = chrome.find_element_by_class_name("new-box94")  # 获取到验证码div
-    ele.screenshot("img.png")  # 截图
-    actions = ActionChains(chrome)
-    client = main.Chaoren()
-    client.data['username'] = 'li1462063555'  # 修改为打码账号
-    client.data['password'] = '19980706..'  # 修改为打码密码
-    # 查剩余验证码点数
-    print(client.get_left_point())
+    while True:
+        ele = chrome.find_element_by_class_name("new-box94")  # 获取到验证码div
+        ele.screenshot("img.png")  # 截图
+        actions = ActionChains(chrome)
+        client = main.Chaoren()
+        client.data['username'] = 'li1462063555'  # 修改为打码账号
+        client.data['password'] = '19980706..'  # 修改为打码密码
+        # 查剩余验证码点数
+        print(client.get_left_point())
 
-    # 提交识别
-    imgdata = open('img.png', 'rb').read()
-    res = client.recv_byte(imgdata)
+        # 提交识别
+        imgdata = open('img.png', 'rb').read()
+        res = client.recv_byte(imgdata)
 
-    if not res:
-        print(res[u'imgId'])
-        client.report_err(res[u'imgId'])
-        print("识别识别,已提交报错")
-        return False
-    else:
-        print(res[u'result'])  # 识别结果
-    zb = res[u'result'].split(";")[0:-1]
-    print("坐标是{}".format(zb))
-    for z in zb:
-        actions.move_to_element_with_offset(ele, int(z.split(",")[0]), int(z.split(",")[1])).click().perform()
-        print("点击了{}".format(z.split(",")[0] + "," + z.split(",")[1]))
-    tijiao = chrome.find_element_by_id("submitie")
-    actions.move_to_element_with_offset(tijiao, 60, 15).click().perform()
-    time.sleep(5)
-    nowurl = chrome.current_url
-    if nowurl[:26] == "https://www.tianyancha.com":
-        print("识别成功")
-        print(nowurl[:26])
-        chrome.close()
-        return True
-    else:
-        # 当验证码识别错误时,报告错误
-        print(res[u'imgId'])
-        print(nowurl[:26])
-        client.report_err(res[u'imgId'])
-        print("识别识别,已提交报错")
-        chrome.close()
-        return False
-
+        if not res:
+            print(res[u'imgId'])
+            client.report_err(res[u'imgId'])
+            print("识别识别,已提交报错")
+            continue
+            # return False
+        else:
+            print(res[u'result'])  # 识别结果
+        zb = res[u'result'].split(";")[0:-1]
+        print("坐标是{}".format(zb))
+        for z in zb:
+            actions.move_to_element_with_offset(ele, int(z.split(",")[0]), int(z.split(",")[1])).click().perform()
+            print("点击了{}".format(z.split(",")[0] + "," + z.split(",")[1]))
+        tijiao = chrome.find_element_by_id("submitie")
+        actions.move_to_element_with_offset(tijiao, 60, 15).click().perform()
+        time.sleep(5)
+        nowurl = chrome.current_url
+        if nowurl[:26] == "https://www.tianyancha.com":
+            print("识别成功")
+            print(nowurl[:26])
+            chrome.close()
+            return True
+        else:
+            # 当验证码识别错误时,报告错误
+            print(res[u'imgId'])
+            print(nowurl[:26])
+            client.report_err(res[u'imgId'])
+            print("识别识别,已提交报错")
+            # chrome.close()
+            # return False
+            time.sleep(2)
 def getpagenum(keyword):
     response = getres(keyword)
     # print(response.text)
@@ -193,7 +195,7 @@ def parsed(keyword,page):
             if phone != "":
                 result.append(res)
         print("解析成功")
-        print(result)
+        # print(result)
         return result
 #写入数据库
 def savefile(res):
@@ -261,14 +263,14 @@ if __name__ == '__main__':
     # exit()
 
     try:
-        run(105,"中卫市工程")
+        run(6,"岳阳市工程")
     except IndexError as e:
         print(str(e))
         sendemail.sendemail("li.yansong@hzsr-media.com", "程序停止啦", "错误信息是:" + str(e))
         exit()
     except Exception as f:
         print(str(f))
-    # print(parsed("天津市金融机构",1))
+    # # print(parsed("天津市金融机构",1))
 
 
 

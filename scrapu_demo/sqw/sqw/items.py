@@ -28,3 +28,4 @@ class SqwItem(scrapy.Item):
     zczb=scrapy.Field()
     gfwz=scrapy.Field()
     ssfl=scrapy.Field()
+    zycp=scrapy.Field()

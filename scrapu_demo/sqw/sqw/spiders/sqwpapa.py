@@ -4,17 +4,19 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 from sqw.items import SqwItem
 import re
+import datetime
 
 
 class SqwpapaSpider(CrawlSpider):
+	# download_delay=2 if datetime.datetime.now().hour > 9 else 4
 	name = 'sqwpapa'
 	allowed_domains = ['11467.com']
-	start_urls = ['http://m.11467.com/shanghai/']
+	start_urls = ['http://m.11467.com/tianjin/']
 
 	rules = (
-		Rule(LinkExtractor(allow=r'm.11467.com/shanghai/search/.+'), follow=True),
+		Rule(LinkExtractor(allow=r'm.11467.com/tianjin/dir/.+'), follow=True),
 		# Rule(LinkExtractor(allow='m.11467.com/shanghai/search/.+'), follow=True),
-		Rule(LinkExtractor(allow=r'm.11467.com/shanghai/co/.+htm'), callback='parse_item', follow=False),
+		Rule(LinkExtractor(allow=r'm.11467.com/tianjin/co/.+htm'), callback='parse_item', follow=False),
 	)
 
 	def start_requests(self):
@@ -52,6 +54,9 @@ class SqwpapaSpider(CrawlSpider):
 		# 经营范围
 		jyfw = re.findall(r'经营范围：</dt><dd>(.+?)</dd>', gsxx)
 		item['jyfw'] = self.check(jyfw)
+		# 主营产品
+		zycp = re.findall(r'产品：</dt><dd>(.+?)</dd>', gsxx)
+		item['zycp'] = re.sub(r'<.*?>', '', self.check(zycp))
 		# 营业执照号码
 		yyzz = re.findall(r'营业执照号码：</dt><dd>(.+?)</dd>', gsxx)
 		item['yyzz'] = self.check(yyzz)

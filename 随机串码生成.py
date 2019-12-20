@@ -11,5 +11,5 @@ def randomstr(lenth):
 
 if __name__=='__main__':
 	with open("./code.txt", 'w', encoding='UTF-8') as f:
-		for i in range(1000000):
+		for i in range(1000):
 			f.write(randomstr(8)+'\n')

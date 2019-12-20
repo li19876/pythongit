@@ -22,6 +22,7 @@ class SqwPipeline(object):
         jyfw=item['jyfw']
         yyzz=item['yyzz']
         fzjg=item['fzjg']
+        zycp=item['zycp']
         jyzt=item['jyzt']
         frdb=item['frdb']
         clsj=item['clsj']
@@ -30,10 +31,8 @@ class SqwPipeline(object):
         gfwz=item['gfwz']
         ssfl=item['ssfl']
 
-        insert = """insert into sqwlist(addres,tel,manager,phone,chuanzhen,email,gsname,jyfw,yyzz,fzjg,jyzt,frdb, 
-        clsj,zyrs,zczb,gfwz,ssfl) values ('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}',
-        '{}','{}')""".format(addres,tel,manager,phone,chuanzhen,email,gsname,jyfw,yyzz,fzjg,jyzt,frdb,
-        clsj,zyrs,zczb,gfwz,ssfl)
+        insert = """insert into sqwlist(addres,tel,manager,phone,chuanzhen,email,gsname,jyfw,yyzz,fzjg,jyzt,frdb,clsj,zyrs,zczb,gfwz,ssfl,more1) values ('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}',
+        '{}','{}','{}')""".format(addres,tel,manager,phone,chuanzhen,email,gsname,jyfw,yyzz,fzjg,jyzt,frdb,clsj,zyrs,zczb,gfwz,ssfl,zycp)
 
         try:
             self.curosr.execute(insert)
