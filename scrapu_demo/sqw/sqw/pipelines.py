@@ -31,8 +31,8 @@ class SqwPipeline(object):
         gfwz=item['gfwz']
         ssfl=item['ssfl']
 
-        insert = """insert into sqwlist(addres,tel,manager,phone,chuanzhen,email,gsname,jyfw,yyzz,fzjg,jyzt,frdb,clsj,zyrs,zczb,gfwz,ssfl,more1) values ('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}',
-        '{}','{}','{}')""".format(addres,tel,manager,phone,chuanzhen,email,gsname,jyfw,yyzz,fzjg,jyzt,frdb,clsj,zyrs,zczb,gfwz,ssfl,zycp)
+        insert = """insert into sqwlist(addres,tel,manager,phone,chuanzhen,email,gsname,jyfw,yyzz,fzjg,jyzt,frdb,clsj,zyrs,zczb,gfwz,ssfl,more1,more2) values ('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}',
+        '{}','{}','{}','{}')""".format(addres,tel,manager,phone,chuanzhen,email,gsname,jyfw,yyzz,fzjg,jyzt,frdb,clsj,zyrs,zczb,gfwz,ssfl,zycp,'北京')
 
         try:
             self.curosr.execute(insert)

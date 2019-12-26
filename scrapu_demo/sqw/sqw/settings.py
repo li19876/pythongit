@@ -55,9 +55,9 @@ DEFAULT_REQUEST_HEADERS = {
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
-RANDOM_DELAY= 4
+RANDOM_DELAY= 3
 DOWNLOADER_MIDDLEWARES = {
-    # 'sqw.middlewares.SqwDownloaderMiddleware': 1000,
+    'sqw.middlewares.SqwDownloaderMiddleware': 500,
 
     "sqw.middlewares.RandomDelayMiddleware": 999,
 

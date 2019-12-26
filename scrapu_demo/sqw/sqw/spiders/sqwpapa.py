@@ -4,6 +4,7 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 from sqw.items import SqwItem
 import re
+import time
 import datetime
 
 
@@ -11,12 +12,12 @@ class SqwpapaSpider(CrawlSpider):
 	# download_delay=2 if datetime.datetime.now().hour > 9 else 4
 	name = 'sqwpapa'
 	allowed_domains = ['11467.com']
-	start_urls = ['http://m.11467.com/tianjin/']
+	start_urls = ['http://m.11467.com/beijing/']
 
 	rules = (
-		Rule(LinkExtractor(allow=r'm.11467.com/tianjin/dir/.+'), follow=True),
+		Rule(LinkExtractor(allow=r'm.11467.com/beijing/search/.+'), follow=True),
 		# Rule(LinkExtractor(allow='m.11467.com/shanghai/search/.+'), follow=True),
-		Rule(LinkExtractor(allow=r'm.11467.com/tianjin/co/.+htm'), callback='parse_item', follow=False),
+		Rule(LinkExtractor(allow=r'm.11467.com/beijing/co/.+htm'), callback='parse_item', follow=False),
 	)
 
 	def start_requests(self):
@@ -28,6 +29,11 @@ class SqwpapaSpider(CrawlSpider):
 		item = SqwItem()
 		# 联系方式
 		lxfs = response.xpath('//*[@id="contact"]/div/dl').get()
+		boo = re.findall(r"您访问的太快了，请联系我们客服", response.xpath("//body").get())
+		if boo:
+			print("访问频率过快被限制了,休息120s")
+			time.sleep(120)
+			return False
 		# 地址
 		addres = re.findall(r'地址：</dt><dd>(.+?)</dd>', lxfs)
 		item['addres'] = addres[0] if addres else ''

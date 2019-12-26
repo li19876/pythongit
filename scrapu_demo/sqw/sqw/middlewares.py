@@ -4,7 +4,7 @@
 #
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
-
+import randphoneua
 from scrapy import signals
 import getip
 import logging
@@ -83,7 +83,11 @@ class SqwDownloaderMiddleware(object):
         # - or return a Request object
         # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
-        request.meta['proxy']='http://'+getip.getip()
+        # request.meta['proxy']='http://'+getip.getip()
+        ua = randphoneua.randua()
+        request.headers['User-Agent'] = ua
+        # print("当前UA是:",request.headers['User-Agent'])
+
         return None
 
     def process_response(self, request, response, spider):
@@ -93,8 +97,8 @@ class SqwDownloaderMiddleware(object):
         # - return a Response object
         # - return a Request object
         # - or raise IgnoreRequest
-        if response.status not in [200,301]:
-            getip.getip(1)
+        # if response.status not in [200,301]:
+        #     getip.getip(1)
         return response
 
     def process_exception(self, request, exception, spider):
