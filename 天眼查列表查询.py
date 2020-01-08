@@ -263,7 +263,7 @@ if __name__ == '__main__':
     # exit()
 
     try:
-        run(6,"岳阳市工程")
+        run(52 ,"银川市工程")
     except IndexError as e:
         print(str(e))
         sendemail.sendemail("li.yansong@hzsr-media.com", "程序停止啦", "错误信息是:" + str(e))

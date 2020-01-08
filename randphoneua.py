@@ -11,5 +11,5 @@ def randua():
     curosr.execute(sql)
     lock.release()
     uas = curosr.fetchall()[0][1]
-    print("当前获取的UA是:"+uas)
+    # print("当前获取的UA是:"+uas)
     return uas

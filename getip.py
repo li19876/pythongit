@@ -2,6 +2,7 @@ import time
 import requests
 import sendemail
 import pymysql
+import selenium
 import threading
 db =pymysql.connect(host="localhost",port=3306,user="root",password="li123456..",db='lys',charset="utf8")
 curosr = db.cursor()
@@ -24,7 +25,7 @@ def getip(refalsh=0):
         return ip
     else:
         try:
-            # re = requests.get("http://icanhazip.com", proxies={"http": ss[0][1]},timeout=(3,10))
+            re = requests.get("http://icanhazip.com", proxies={"http": ss[0][1]},timeout=(3,10))
             print("返回一个数据库的ip")
             return ss[0][1]
         except Exception as e:
