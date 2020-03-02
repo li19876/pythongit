@@ -6,7 +6,7 @@ import re
 
 
 
-url = 'https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=MzU2NjM3Mzk0Nw==&scene=124&uin=NzgyNjg2NjQy&key=f3b89a09cde51f0ff750e88b7aeda5482f763af8714f732bf9acdd837c199954917c97109932116351bc48ca7acbd3f2f4169fe09a35e947584fbd0112cf5b0bbb3e422845cf2dfdca2be7ca4794e4f4&devicetype=Windows+7&version=62060833&lang=zh_CN&a8scene=7&pass_ticket=VpVE6boQ8Lc21W4SXq0kvNn4gHWUjO%2BYHRpsL7QM75VbcVcztJ6%2FkZW51cd0rkWa&winzoom=1'
+url = 'https://mp.weixin.qq.com/mp/getmasssendmsg?__biz=MzA5MjMwNzc4MQ==&uin=NzgyNjg2NjQy&key=ff1b1d089c15295c9e9abba5ef2a80c18e239346467ae3ac08da1becccd32c52a6e2f956b87aa5f197240bc7c2766b1d0c860a2afb50c3a464fce941a0923942863d4eb86ef06fc798bea22f4139d4f2&devicetype=Windows+7&version=6208006f&lang=zh_CN&ascene=7&pass_ticket=mmk9aZiuxirN0X0YkveOPGzmOXzIlAWrhRteHGslT05KkYD8nyaEYjBUS1BVCIex'
 # Chromedriver
 opt = webdriver.ChromeOptions()
 # prefs = {'profile.default_content_setting_values': {'images': 2}}

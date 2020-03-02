@@ -3,7 +3,8 @@ import smtplib
 from email.mime.text import MIMEText
 def sendemail(to,title,content):
     msg_from = '1462063555@qq.com'  # 发送方邮箱
-    passwd = 'qbfifvahyylvfebj'  # 填入发送方邮箱的授权码
+    # passwd = 'qbfifvahyylvfebj'  # 填入发送方邮箱的授权码
+    passwd = 'vvnzkmcxlmovfjbi'  # 填入发送方邮箱的授权码
     msg_to = to  # 收件人邮箱
 
     subject = title  # 主题
@@ -22,3 +23,6 @@ def sendemail(to,title,content):
         print("发送失败")
     finally:
         s.quit()
+
+if __name__=='__main__':
+    sendemail("li.yansong@hzsr-media.com", "程序停止啦", "错误信息是:")

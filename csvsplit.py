@@ -31,8 +31,8 @@ def run():
         n=line
         c =[ss[i:i+n] for i in range(0,len(ss),n)]
         for s in c:
-            with open(filename+os.sep+str(c.index(s))+".txt","a",encoding=encoding) as fp:
-                print("创建了"+str(c.index(s))+".txt")
+            with open(filename+os.sep+str(c.index(s))+".csv","a",encoding=encoding) as fp:
+                print("创建了"+str(c.index(s))+".csv")
                 for v in s:
                     fp.write(v)
         print("分割完成")
