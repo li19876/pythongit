@@ -3,10 +3,13 @@ from fake_useragent import UserAgent
 from lxml import etree
 import datetime
 import pymysql
+from selenium.webdriver.chrome.options import Options
+
 import sendemail
 import random
 import time
 import main
+import json
 import make_header
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
@@ -74,20 +77,28 @@ User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like 
                 # if chrome.current_url[:26] == "https://www.tianyancha.com":
                 #     chrome.quit()
                 #     return 400
-            except:
-                pass
+            except Exception as e:
+                print(e)
 
 
 def yanzheng(cookie, url):
     cookies = {i.split("=")[0]: i.split("=")[1] for i in cookie.split("; ")}
+
+    # chrome_options = webdriver.ChromeOptions()
+    # chrome_options.add_argument('--disable-gpu') # 无头模式
+    # chrome_options.add_argument('--headless')
     chrome = webdriver.Chrome()
     chrome.set_window_size(1000, 800)
     chrome.get("http://www.tianyancha.com")  # 先get一下后面才能加cookie
+    # print('进来了')
+    # chrome.get_screenshot_as_file('aaa.png')
+    # print('截图了')
     for i in cookies:
         chrome.add_cookie({"name": i, "value": cookies[i]})
     chrome.get(url)
     for i in cookies:
         chrome.add_cookie({"name": i, "value": cookies[i]})
+
     while True:
         ele = chrome.find_element_by_class_name("new-box94")  # 获取到验证码div
         ele.screenshot("img.png")  # 截图
@@ -143,19 +154,22 @@ def getpagenum(keyword):
         return None
     else:
         html = etree.HTML(response.text)
-        resnum = html.xpath("//*[@id='search']/div[1]/span[2]/text()")[0]
-        if resnum == "100000+":
-            resnum = 5000
+        resnum = html.xpath("//*[@id='search']/div[1]/span[2]/text()")
+        if resnum:
+            resnum=resnum[0]
+            if resnum == "100000+":
+                resnum = 5000
+            else:
+                resnum = int(resnum)
+            print("获取页数成功,页数为:{}".format(resnum))
+            if resnum == 0:
+                return 0
+            elif resnum > 4999:
+                return 250
+            else:
+                return resnum // 20 + 1
         else:
-            resnum = int(resnum)
-        print("获取页数成功,页数为:{}".format(resnum))
-        if resnum == 0:
-            return 0
-        elif resnum > 5000:
-            return 250
-        else:
-            return resnum // 20 + 1
-
+            return None
 
 # 解析响应内容
 # 参数为要查询的公司名
@@ -165,6 +179,8 @@ def parsed(keyword, page):
         return response
     else:
         html = etree.HTML(response.text)
+        # resnum = html.xpath("//span[@class='tips-num']/text()")  # 条数
+
         lxlist = html.xpath('//div[@class="contact row "]')
         # print(lxlist)
         # print(response.text)
@@ -194,8 +210,8 @@ def parsed(keyword, page):
             else:
                 qyzt = ''
             # 经营范围
-            jyfw = gs.xpath('string(.//../div[@class="match row text-ellipsis"])')
-
+            jyfw = gs.xpath('string(.//../div[@class="match row text-ellipsis "])')
+            # print(jyfw)
             # print(phone2)
             if phone2:
                 phone = eval(phone2[0])
@@ -235,7 +251,7 @@ def savefile(res):
         print("发生错误，回滚事务")
 
 
-def run(num, keyword):
+def run(keyword, num):
     keylist = keymath()
     citylist = []
     with open("gongsi.txt", "r") as f:
@@ -253,26 +269,44 @@ def run(num, keyword):
                         for ss in citylist:
                             fp.write(ss + "\n")
                     continue
+                if ress=='nopage':
+                    with open("gongsi.txt", "w") as fp:
+                        for ss in citylist:
+                            fp.write(ss + "\n")
+                    raise IndexError
                 print("当前page是" + str(page))
                 print("查询关键词:{}".format(key))
 
                 for res in ress:
                     # pass
                     savefile(res)
-                s = random.randint(1, 3)
+                # s = random.randint(1, 3)
+                s=0
                 time.sleep(s)
                 print("第{}页抓取完成，休息{}秒".format(page, s))
+                with open('tyclog.txt','r') as fp:
+                    num=fp.read()
+                with open('tyclog.txt','w') as w:
+                    w.write(str(int(num)+1))
             city = key.replace("工程", "")
             # print(city)
             citylist.remove(city)
+            with open("gongsi.txt", "w") as fp:
+                for ss in citylist:
+                    fp.write(ss + "\n")
         else:
             print("没获取到页数")
+            with open('parme.json', 'w') as j:
+                dic = {'key': key, 'page': 1}
+                j.write(json.dumps(dic))
+                print(dic)
+                raise IndexError
         # print(citylist)
         # exit()
 
 
 def keymath():
-    # keylist = ["建筑", "劳务", "建筑劳务", "建筑工程", "消防工程", "监理", "工程建设", "工程建筑", '工程','消防安全工程']
+    # 实业 公路工程 特种工程 照明工程 土石方工程 弱电工程 水利工程 绿化工程 管道工程 环保工程 防水工程 幕墙工程 钢结构工程 装修工程 装饰工程 钢结构施工 市政工程 建筑工程 装修施工 保温工程 安装工程 安防工程 智能化工程
     keylist = ["工程"]
     keyword_list = []
     citylist = []
@@ -286,16 +320,29 @@ def keymath():
 
 
 if __name__ == '__main__':
+    # with open('parme.json', 'w') as j:
+    #     dic = {'key': '鄯善县工程', 'page': 12}
+    #     j.write(json.dumps(dic))
+    #     print(dic)
     # time.sleep(20000)
     # exit()
-
-    try:
-        run(100, "兴城市工程")
-    except IndexError as e:
-
-        print(str(e))
-        sendemail.sendemail("li.yansong@hzsr-media.com", "程序停止啦", "错误信息是:" + str(e))
-        exit()
-    except Exception as f:
-        print(str(f))
-    # # print(parsed("天津市金融机构",1))
+    while 1:
+        try:
+            with open('parme.json', 'r') as f:
+                s = f.readline()
+                parme_dic=json.loads(s)
+            run(parme_dic['key'],parme_dic['page'])
+        except IndexError as e:
+            print(str(e))
+            for i in range(3600):
+                print('当前剩余{}秒'.format(3600-i))
+                time.sleep(1)
+            continue
+            # run(parme_dic['key'],parme_dic['page'])
+            # sendemail.sendemail("li.yansong@hzsr-media.com", "程序停止啦", "错误信息是:" + str(e))
+            # exit()
+        except Exception as f:
+            print(str(f))
+    # cookie = 'TYCID=f2564d2097f311e9b4169345e5b2d504; undefined=f2564d2097f311e9b4169345e5b2d504; ssuid=4261586970; _ga=GA1.2.238743067.1561540964; __insp_wid=677961980; __insp_slim=1565856225188; __insp_nv=true; __insp_targlpu=aHR0cHM6Ly93d3cudGlhbnlhbmNoYS5jb20vY2xhaW0vYXBwbHkvMzM2MTM4MTQyMT9wcmljaW5nUGFja2FnZT0wJmVkaXRNb2JpbGU9MQ%3D%3D; __insp_targlpt=5aSp55y85p_lLeWVhuS4muWuieWFqOW3peWFt1%2FkvIHkuJrkv6Hmga%2Fmn6Xor6Jf5YWs5Y_45p_l6K_iX_W3peWVhuafpeivol%2FkvIHkuJrkv6HnlKjkv6Hmga%2Fns7vnu58%3D; tyc-user-phone=%255B%252218202610240%2522%255D; aliyungf_tc=AQAAABzUpR+ZAAQAZlUvaqXXar+Pcvo3; csrfToken=m83Ckh4VZV4JRU3xF8Hum_7d; bannerFlag=undefined; Hm_lvt_e92c8d65d92d534b0fc290df538b4758=1583116788; _gid=GA1.2.277692571.1583116788; tyc-user-info=%257B%2522claimEditPoint%2522%253A%25220%2522%252C%2522explainPoint%2522%253A%25220%2522%252C%2522integrity%2522%253A%25220%2525%2522%252C%2522state%2522%253A%25223%2522%252C%2522surday%2522%253A%2522148%2522%252C%2522announcementPoint%2522%253A%25220%2522%252C%2522bidSubscribe%2522%253A%2522-1%2522%252C%2522vipManager%2522%253A%25220%2522%252C%2522onum%2522%253A%252210%2522%252C%2522monitorUnreadCount%2522%253A%25220%2522%252C%2522discussCommendCount%2522%253A%25220%2522%252C%2522claimPoint%2522%253A%25220%2522%252C%2522token%2522%253A%2522eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxODIwMjYxMDI0MCIsImlhdCI6MTU4MzExNjgxNiwiZXhwIjoxNjE0NjUyODE2fQ.-i9BSFXI-82Xbl_Zx2UPx4F4xdJHXyNdT6VXOfLxoMoWCVYie65FqaQn36i0jBrpqwbZSrQy61_6i_2mtlv05w%2522%252C%2522vipToTime%2522%253A%25221595903278098%2522%252C%2522redPoint%2522%253A%25220%2522%252C%2522myAnswerCount%2522%253A%25220%2522%252C%2522myQuestionCount%2522%253A%25220%2522%252C%2522signUp%2522%253A%25220%2522%252C%2522nickname%2522%253A%2522%25E9%2599%2588%25E7%25BE%258E%2522%252C%2522privateMessagePointWeb%2522%253A%25220%2522%252C%2522privateMessagePoint%2522%253A%25220%2522%252C%2522isClaim%2522%253A%25220%2522%252C%2522isExpired%2522%253A%25220%2522%252C%2522pleaseAnswerCount%2522%253A%25220%2522%252C%2522vnum%2522%253A%25220%2522%252C%2522bizCardUnread%2522%253A%25220%2522%252C%2522mobile%2522%253A%252218202610240%2522%257D; auth_token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxODIwMjYxMDI0MCIsImlhdCI6MTU4MzExNjgxNiwiZXhwIjoxNjE0NjUyODE2fQ.-i9BSFXI-82Xbl_Zx2UPx4F4xdJHXyNdT6VXOfLxoMoWCVYie65FqaQn36i0jBrpqwbZSrQy61_6i_2mtlv05w; Hm_lpvt_e92c8d65d92d534b0fc290df538b4758=1583116818'
+    # cookies = {i.split("=")[0]: i.split("=")[1] for i in cookie.split("; ")}
+    # yanzheng(cookie,'https://www.tianyancha.com/search/ohp1/p3?key=石景山区工程')
