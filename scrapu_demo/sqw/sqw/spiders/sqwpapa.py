@@ -12,17 +12,17 @@ class SqwpapaSpider(CrawlSpider):
 	# download_delay=2 if datetime.datetime.now().hour > 9 else 4
 	name = 'sqwpapa'
 	allowed_domains = ['11467.com']
-	start_urls = ['http://m.11467.com/beijing/']
+	start_urls = ['http://m.11467.com/guangzhou/']
 
 	rules = (
-		Rule(LinkExtractor(allow=r'm.11467.com/beijing/search/.+'), follow=True),
+		Rule(LinkExtractor(allow=r'm.11467.com/guangzhou/search/.+'), follow=True),
 		# Rule(LinkExtractor(allow='m.11467.com/shanghai/search/.+'), follow=True),
-		Rule(LinkExtractor(allow=r'm.11467.com/beijing/co/.+htm'), callback='parse_item', follow=False),
+		Rule(LinkExtractor(allow=r'm.11467.com/guangzhou/co/.+htm'), callback='parse_item', follow=False),
 	)
 
-	def start_requests(self):
-		for url in self.start_urls:
-			yield scrapy.Request(url, dont_filter= True)
+	# def start_requests(self):
+	# 	for url in self.start_urls:
+	# 		yield scrapy.Request(url, dont_filter= True)
 
 
 	def parse_item(self, response):

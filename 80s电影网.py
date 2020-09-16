@@ -25,7 +25,7 @@ def getres(url):
     cookies = {i.split('=')[0]:i.split('=')[1] for i in cookie.split('; ')}
     while True:
         try:
-            res = requests.get(url,headers=headers,cookies=cookies,proxies={'http':"http://"+getip.getip()},timeout=5)
+            res = requests.get(url,headers=headers,cookies=cookies,timeout=5)
             return res
         except Exception as e:
             print("访问出错,休息3S,错误信息:",str(e))
@@ -96,7 +96,7 @@ def update(item,id):
 if __name__=='__main__':
     # 获取大概
     # urllist=[]
-    # for i in range(729):
+    # for i in range(750):
     #     urllist.append('http://www.y80s.com/movie/list/-----p'+str(i))
     # for url in urllist:
     #     print(url)

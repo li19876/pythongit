@@ -37,11 +37,11 @@ def hec(bgimg, text):
     # region = region.resize((box[2] - box[0], box[3] - box[1]))
     # base_img.paste(region, box)
     draw = ImageDraw.Draw(base_img)  # 修改图片
-    x=3050+((1400-((len(text)-3)*90))/2)
-    font = ImageFont.truetype('C:/Windows/Fonts/SourceHanSansK-Bold.ttf', 90)
-    draw.text((x, 573), text, fill=(0, 0, 0), font=font)  # 利用ImageDraw的内置函数，在图片上写入文字
+    # x=3050+((1400-((len(text)-3)*90))/2)
+    font = ImageFont.truetype('C:/Windows/Fonts/SourceHanSansK-Bold.ttf', 24)
+    draw.text((2030, 2200), text, fill=(0, 0, 0), font=font)  # 利用ImageDraw的内置函数，在图片上写入文字
     # base_img.show() # 查看合成的图片
-    base_img.save('C:\\Users\\Administrator\\Desktop\\tongliao\\'+text[:6]+'.jpg')  # 保存图片
+    base_img.save('C:\\Users\\Administrator\\Desktop\\tongliao\\'+text+'.jpg')  # 保存图片
 
 
 if __name__ == '__main__':
@@ -57,12 +57,7 @@ if __name__ == '__main__':
         files =file
     for f in files[2]:
         filelist.append(files[0]+os.sep+f)
-    with open("tongliao.txt",'r',encoding='utf-8') as f:
-        for i in f:
-            list1=[s for s in i.split(',')]
-
-    # box = (3050,700,4450,2100)
-    for i in filelist:
-        text= list1.pop(0)
-        hec(i,text)
+    for s in filelist:
+        text= s.split('\\')[-1].split('_')[0]
+        hec(s,text)
 

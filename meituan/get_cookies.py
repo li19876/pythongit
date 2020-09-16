@@ -10,7 +10,7 @@ import json
 from lxml import etree
 from getip import getip
 import randphoneua
-ci='50'
+ci='20'
 # 返回一个ip和对应的cookie，cookie以字符串形式返回。ip需要经过测试
 def get_cookie(refalsh=0):
     mark = 0
@@ -34,7 +34,7 @@ def get_cookie(refalsh=0):
         driver = webdriver.Chrome(options=chrome_options)
         # driver.set_page_load_timeout(8)  # 设置超时
         # driver.set_script_timeout(8)
-        url = 'https://i.meituan.com/hangzhou/'  # 美团深圳首页
+        url = 'https://i.meituan.com/guangzhou/'  # 美团深圳首页
         url2 = 'https://meishi.meituan.com/i/?ci='+ci+'&stid_b=1&cevent=imt%2Fhomepage%2Fcategory1%2F1'  # 美食页面
         try:
             driver.get(url)

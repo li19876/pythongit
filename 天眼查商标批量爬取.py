@@ -75,7 +75,7 @@ def save(item):
     try:
         curosr.execute(sql)
         db.commit()
-        print('写入了:' + value)
+        print('写入了:' + item['a'])
     except Exception as e:
         print(e)
         db.rollback()
@@ -119,7 +119,7 @@ def run(big,p,sm):
         for i in f:
             urllist.append(i.strip())  # 获取总类别文件url,也就是各分类的url
     for url in urllist[big:]:
-        print(url)
+        print(url+"索引是:"+str(urllist.index(url)))
         res = getres(url)
         page = getpage(res)
         if page is not None:
@@ -132,7 +132,7 @@ def run(big,p,sm):
                     res = getres(s)
                     item = parse_detail(res)
                     save(item)
-                    time.sleep(1)
+                    time.sleep(0.5)
         else:
             print("没获取到页数")
             exit()
@@ -151,5 +151,5 @@ if __name__ == '__main__':
     #                 f.write(s+'\n')
     #                 print('写入了'+s)
     #         time.sleep(2)
-    run(0,5,4)
+    run(0,34,2)
 #

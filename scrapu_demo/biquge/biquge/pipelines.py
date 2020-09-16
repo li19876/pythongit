@@ -24,9 +24,10 @@ class BiqugePipeline(object):
             print("创建文件:", filename)
             f.write("第{}章".format(str(item['index'])))
             f.write(item['title']+'\n')
-            for i in item['content']:
-                if i != "":
-                    f.write(i+'\n')
+            f.write(item['content']+'\n')
+            # for i in item['content']:
+            #     if i != "":
+            #         f.write(i+'\n')
             print("{}写入完成".format(filename))
 
     def open_spider(self, spider):

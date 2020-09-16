@@ -7,7 +7,7 @@ import threading
 db =pymysql.connect(host="localhost",port=3306,user="root",password="li123456..",db='lys',charset="utf8")
 curosr = db.cursor()
 lock = threading.Lock()
-url = "http://www.xiongmaodaili.com/xiongmao-web/api/glip?secret=23225551106b6bfd49129dcc97f0c91b&orderNo=GL20190620165705pPDVsNCm&count=1&isTxt=1&proxyType=1"
+url = "http://route.xiongmaodaili.com/xiongmao-web/api/glip?secret=23225551106b6bfd49129dcc97f0c91b&orderNo=GL20200827155629sfDw0K93&count=1&isTxt=1&proxyType=1"
 def getip(refalsh=0):
     now = int(time.time())
     sec = """

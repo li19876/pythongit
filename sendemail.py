@@ -2,9 +2,9 @@
 import smtplib
 from email.mime.text import MIMEText
 def sendemail(to,title,content):
-    msg_from = '1462063555@qq.com'  # 发送方邮箱
+    msg_from = 'li.yansong@hzsr-media.com'  # 发送方邮箱
     # passwd = 'qbfifvahyylvfebj'  # 填入发送方邮箱的授权码
-    passwd = 'vvnzkmcxlmovfjbi'  # 填入发送方邮箱的授权码
+    passwd = 'li19980706..'  # 填入发送方邮箱的授权码
     msg_to = to  # 收件人邮箱
 
     subject = title  # 主题
@@ -14,7 +14,7 @@ def sendemail(to,title,content):
     msg['To'] = msg_to
 
     try:
-        s = smtplib.SMTP_SSL("smtp.qq.com", 465)  # 邮件服务器及端口号
+        s = smtplib.SMTP_SSL("smtp.sina.net", 465)  # 邮件服务器及端口号
         s.login(msg_from, passwd)
         s.sendmail(msg_from, msg_to, msg.as_string())
         print("发送成功")
@@ -25,4 +25,4 @@ def sendemail(to,title,content):
         s.quit()
 
 if __name__=='__main__':
-    sendemail("li.yansong@hzsr-media.com", "程序停止啦", "错误信息是:")
+    sendemail("1462063555@qq.com", "程序停止啦", "错误信息是:")

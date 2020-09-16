@@ -32,7 +32,7 @@ class SqwPipeline(object):
         ssfl=item['ssfl']
 
         insert = """insert into sqwlist(addres,tel,manager,phone,chuanzhen,email,gsname,jyfw,yyzz,fzjg,jyzt,frdb,clsj,zyrs,zczb,gfwz,ssfl,more1,more2) values ('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}',
-        '{}','{}','{}','{}')""".format(addres,tel,manager,phone,chuanzhen,email,gsname,jyfw,yyzz,fzjg,jyzt,frdb,clsj,zyrs,zczb,gfwz,ssfl,zycp,'北京')
+        '{}','{}','{}','{}')""".format(addres,tel,manager,phone,chuanzhen,email,gsname,jyfw,yyzz,fzjg,jyzt,frdb,clsj,zyrs,zczb,gfwz,ssfl,zycp,'广州')
 
         try:
             self.curosr.execute(insert)

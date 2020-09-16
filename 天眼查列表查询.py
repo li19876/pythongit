@@ -4,7 +4,7 @@ from lxml import etree
 import datetime
 import pymysql
 from selenium.webdriver.chrome.options import Options
-
+import nb_print
 import sendemail
 import random
 import time
@@ -19,12 +19,13 @@ db = pymysql.connect(host="localhost", port=3306, user="root", password="li12345
 curosr = db.cursor()
 
 
+
 # 获取响应
 # 参数为要查询的公司名
 def getres(keyword="北京皓智顺然", page=1):
     url = "https://www.tianyancha.com/search/ohp1/p{}?key={}".format(page, keyword)
-    nowTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # 现在
-    print(url + " " + nowTime)
+    # nowTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # 现在
+    print(url)
     # headers = {
     #     'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
     #     'Accept-Encoding':'gzip, deflate, br',
@@ -40,7 +41,7 @@ def getres(keyword="北京皓智顺然", page=1):
 Accept-Encoding: gzip, deflate, br
 Accept-Language: zh-CN,zh;q=0.9
 Cache-Control: no-cache
-Connection: keep-alive
+Connection: close
 Host: www.tianyancha.com
 Pragma: no-cache
 Referer: https://www.tianyancha.com/
@@ -48,13 +49,13 @@ Upgrade-Insecure-Requests: 1
 User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36"""
     headers = make_header.make(header)
     headers["User-Agent"] = ua.random
-    cookie = 'TYCID=f2564d2097f311e9b4169345e5b2d504; undefined=f2564d2097f311e9b4169345e5b2d504; ssuid=4261586970; _ga=GA1.2.238743067.1561540964; __insp_wid=677961980; __insp_slim=1565856225188; __insp_nv=true; __insp_targlpu=aHR0cHM6Ly93d3cudGlhbnlhbmNoYS5jb20vY2xhaW0vYXBwbHkvMzM2MTM4MTQyMT9wcmljaW5nUGFja2FnZT0wJmVkaXRNb2JpbGU9MQ%3D%3D; __insp_targlpt=5aSp55y85p_lLeWVhuS4muWuieWFqOW3peWFt1%2FkvIHkuJrkv6Hmga%2Fmn6Xor6Jf5YWs5Y_45p_l6K_iX_W3peWVhuafpeivol%2FkvIHkuJrkv6HnlKjkv6Hmga%2Fns7vnu58%3D; tyc-user-phone=%255B%252218202610240%2522%255D; aliyungf_tc=AQAAABzUpR+ZAAQAZlUvaqXXar+Pcvo3; csrfToken=m83Ckh4VZV4JRU3xF8Hum_7d; bannerFlag=undefined; Hm_lvt_e92c8d65d92d534b0fc290df538b4758=1583116788; _gid=GA1.2.277692571.1583116788; tyc-user-info=%257B%2522claimEditPoint%2522%253A%25220%2522%252C%2522explainPoint%2522%253A%25220%2522%252C%2522integrity%2522%253A%25220%2525%2522%252C%2522state%2522%253A%25223%2522%252C%2522surday%2522%253A%2522148%2522%252C%2522announcementPoint%2522%253A%25220%2522%252C%2522bidSubscribe%2522%253A%2522-1%2522%252C%2522vipManager%2522%253A%25220%2522%252C%2522onum%2522%253A%252210%2522%252C%2522monitorUnreadCount%2522%253A%25220%2522%252C%2522discussCommendCount%2522%253A%25220%2522%252C%2522claimPoint%2522%253A%25220%2522%252C%2522token%2522%253A%2522eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxODIwMjYxMDI0MCIsImlhdCI6MTU4MzExNjgxNiwiZXhwIjoxNjE0NjUyODE2fQ.-i9BSFXI-82Xbl_Zx2UPx4F4xdJHXyNdT6VXOfLxoMoWCVYie65FqaQn36i0jBrpqwbZSrQy61_6i_2mtlv05w%2522%252C%2522vipToTime%2522%253A%25221595903278098%2522%252C%2522redPoint%2522%253A%25220%2522%252C%2522myAnswerCount%2522%253A%25220%2522%252C%2522myQuestionCount%2522%253A%25220%2522%252C%2522signUp%2522%253A%25220%2522%252C%2522nickname%2522%253A%2522%25E9%2599%2588%25E7%25BE%258E%2522%252C%2522privateMessagePointWeb%2522%253A%25220%2522%252C%2522privateMessagePoint%2522%253A%25220%2522%252C%2522isClaim%2522%253A%25220%2522%252C%2522isExpired%2522%253A%25220%2522%252C%2522pleaseAnswerCount%2522%253A%25220%2522%252C%2522vnum%2522%253A%25220%2522%252C%2522bizCardUnread%2522%253A%25220%2522%252C%2522mobile%2522%253A%252218202610240%2522%257D; auth_token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxODIwMjYxMDI0MCIsImlhdCI6MTU4MzExNjgxNiwiZXhwIjoxNjE0NjUyODE2fQ.-i9BSFXI-82Xbl_Zx2UPx4F4xdJHXyNdT6VXOfLxoMoWCVYie65FqaQn36i0jBrpqwbZSrQy61_6i_2mtlv05w; Hm_lpvt_e92c8d65d92d534b0fc290df538b4758=1583116818'
+    cookie = 'TYCID=f2564d2097f311e9b4169345e5b2d504; undefined=f2564d2097f311e9b4169345e5b2d504; ssuid=4261586970; _ga=GA1.2.238743067.1561540964; __insp_wid=677961980; __insp_slim=1565856225188; __insp_nv=true; __insp_targlpu=aHR0cHM6Ly93d3cudGlhbnlhbmNoYS5jb20vY2xhaW0vYXBwbHkvMzM2MTM4MTQyMT9wcmljaW5nUGFja2FnZT0wJmVkaXRNb2JpbGU9MQ%3D%3D; __insp_targlpt=5aSp55y85p_lLeWVhuS4muWuieWFqOW3peWFt1%2FkvIHkuJrkv6Hmga%2Fmn6Xor6Jf5YWs5Y_45p_l6K_iX_W3peWVhuafpeivol%2FkvIHkuJrkv6HnlKjkv6Hmga%2Fns7vnu58%3D; tyc-user-phone=%255B%252218202610240%2522%255D; aliyungf_tc=AQAAAP6R1zbgowoAxFIvakPkLRWxsP6z; csrfToken=1k0IKEbnARYqM-m71S7vbDry; Hm_lvt_e92c8d65d92d534b0fc290df538b4758=1583198527,1583298144,1583366654,1583922481; bannerFlag=true; _gid=GA1.2.1548451223.1585017829; RTYCID=383e026dec3c467aafe34c3342feea05; CT_TYCID=50eea2c3a7b9483eabf107f1cedf5eac; token=08402a5e0ecc4808bd0c68c1a8e13056; _utm=218e200207774d9e8251dfd602725487; cloud_token=5fe4ec56c0304f9c9aeac29094456a39; tyc-user-info=%257B%2522claimEditPoint%2522%253A%25220%2522%252C%2522vipToMonth%2522%253A%2522false%2522%252C%2522explainPoint%2522%253A%25220%2522%252C%2522integrity%2522%253A%252210%2525%2522%252C%2522state%2522%253A%25223%2522%252C%2522surday%2522%253A%2522125%2522%252C%2522announcementPoint%2522%253A%25220%2522%252C%2522schoolGid%2522%253A%2522%2522%252C%2522bidSubscribe%2522%253A%2522-1%2522%252C%2522vipManager%2522%253A%25220%2522%252C%2522onum%2522%253A%252210%2522%252C%2522monitorUnreadCount%2522%253A%25220%2522%252C%2522discussCommendCount%2522%253A%25220%2522%252C%2522claimPoint%2522%253A%25220%2522%252C%2522token%2522%253A%2522eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxODIwMjYxMDI0MCIsImlhdCI6MTU4NTEzMTkyNiwiZXhwIjoxNjAwNjgzOTI2fQ.Zul7ephCWp4RKZ9Ua1O1CtzGJoFtl302JAp1tmVCC3TkhTnjA0mEdCXWcada_FovYB-F6oi__0lXNWRSiQObIg%2522%252C%2522schoolAuthStatus%2522%253A%25222%2522%252C%2522vipToTime%2522%253A%25221595903278098%2522%252C%2522redPoint%2522%253A%25220%2522%252C%2522companyAuthStatus%2522%253A%25222%2522%252C%2522myAnswerCount%2522%253A%25220%2522%252C%2522myQuestionCount%2522%253A%25220%2522%252C%2522signUp%2522%253A%25220%2522%252C%2522nickname%2522%253A%2522%25E9%2599%2588%25E7%25BE%258E%2522%252C%2522privateMessagePointWeb%2522%253A%25220%2522%252C%2522privateMessagePoint%2522%253A%25220%2522%252C%2522isClaim%2522%253A%25220%2522%252C%2522isExpired%2522%253A%25220%2522%252C%2522pleaseAnswerCount%2522%253A%25220%2522%252C%2522bizCardUnread%2522%253A%25220%2522%252C%2522vnum%2522%253A%25220%2522%252C%2522companyGid%2522%253A%2522%2522%252C%2522mobile%2522%253A%252218202610240%2522%257D; auth_token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxODIwMjYxMDI0MCIsImlhdCI6MTU4NTEzMTkyNiwiZXhwIjoxNjAwNjgzOTI2fQ.Zul7ephCWp4RKZ9Ua1O1CtzGJoFtl302JAp1tmVCC3TkhTnjA0mEdCXWcada_FovYB-F6oi__0lXNWRSiQObIg; _gat_gtag_UA_123487620_1=1; Hm_lpvt_e92c8d65d92d534b0fc290df538b4758=1585131950'
     cookies = {i.split("=")[0]: i.split("=")[1] for i in cookie.split("; ")}
     try:
-        response = requests.get(url, headers=headers, cookies=cookies)
+        response = session.get(url, headers=headers, cookies=cookies)
     except Exception as e:
         print(str(e))
-        response = requests.get(url, headers=headers, cookies=cookies)
+        response = session.get(url, headers=headers, cookies=cookies)
     if response.status_code == 200:
         print("访问成功")
         # print(response.text)
@@ -89,6 +90,7 @@ def yanzheng(cookie, url):
     # chrome_options.add_argument('--headless')
     chrome = webdriver.Chrome()
     chrome.set_window_size(1000, 800)
+    chrome.set_window_position(1700,200)
     chrome.get("http://www.tianyancha.com")  # 先get一下后面才能加cookie
     # print('进来了')
     # chrome.get_screenshot_as_file('aaa.png')
@@ -239,16 +241,17 @@ def parsed(keyword, page):
 # 写入数据库
 def savefile(res):
     sql = """
-            insert into tyclist(city,gsname,frname,phone,email,zczb,qyzt,buildtime,jyfw) values ('{}','{}','{}','{}','{}','{}','{}','{}','{}')
+            insert into tyclist(city,gsname,frname,phone,email,zczb,qyzt,buildtime,jyfw,create_time) values ('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}')
         """.format(res["city"], res["gsname"], res["frname"], res["phone"], res["email"], res["zczb"], res["qyzt"],
-                   res["buildtime"], res["jyfw"])
+                   res["buildtime"], res["jyfw"],datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     try:
+        db.ping(reconnect=True)
         curosr.execute(sql)
         db.commit()
         print("写入了:{},{},{},{},{}".format(res["city"], res["gsname"], res["frname"], res["phone"], res["email"]))
-    except:
+    except Exception as e:
         db.rollback()
-        print("发生错误，回滚事务")
+        print("发生错误，回滚事务:"+str(e))
 
 
 def run(keyword, num):
@@ -280,8 +283,8 @@ def run(keyword, num):
                 for res in ress:
                     # pass
                     savefile(res)
-                # s = random.randint(1, 3)
-                s=0
+                s = random.randint(1, 3)
+                # s=0
                 time.sleep(s)
                 print("第{}页抓取完成，休息{}秒".format(page, s))
                 with open('tyclog.txt','r') as fp:
@@ -321,11 +324,11 @@ def keymath():
 
 if __name__ == '__main__':
     # with open('parme.json', 'w') as j:
-    #     dic = {'key': '鄯善县工程', 'page': 12}
+    #     dic = {'key': '东城区工程', 'page': 92}
     #     j.write(json.dumps(dic))
     #     print(dic)
-    # time.sleep(20000)
-    # exit()
+    #     exit()
+    session=requests.session()
     while 1:
         try:
             with open('parme.json', 'r') as f:
@@ -341,8 +344,9 @@ if __name__ == '__main__':
             # run(parme_dic['key'],parme_dic['page'])
             # sendemail.sendemail("li.yansong@hzsr-media.com", "程序停止啦", "错误信息是:" + str(e))
             # exit()
-        except Exception as f:
-            print(str(f))
-    # cookie = 'TYCID=f2564d2097f311e9b4169345e5b2d504; undefined=f2564d2097f311e9b4169345e5b2d504; ssuid=4261586970; _ga=GA1.2.238743067.1561540964; __insp_wid=677961980; __insp_slim=1565856225188; __insp_nv=true; __insp_targlpu=aHR0cHM6Ly93d3cudGlhbnlhbmNoYS5jb20vY2xhaW0vYXBwbHkvMzM2MTM4MTQyMT9wcmljaW5nUGFja2FnZT0wJmVkaXRNb2JpbGU9MQ%3D%3D; __insp_targlpt=5aSp55y85p_lLeWVhuS4muWuieWFqOW3peWFt1%2FkvIHkuJrkv6Hmga%2Fmn6Xor6Jf5YWs5Y_45p_l6K_iX_W3peWVhuafpeivol%2FkvIHkuJrkv6HnlKjkv6Hmga%2Fns7vnu58%3D; tyc-user-phone=%255B%252218202610240%2522%255D; aliyungf_tc=AQAAABzUpR+ZAAQAZlUvaqXXar+Pcvo3; csrfToken=m83Ckh4VZV4JRU3xF8Hum_7d; bannerFlag=undefined; Hm_lvt_e92c8d65d92d534b0fc290df538b4758=1583116788; _gid=GA1.2.277692571.1583116788; tyc-user-info=%257B%2522claimEditPoint%2522%253A%25220%2522%252C%2522explainPoint%2522%253A%25220%2522%252C%2522integrity%2522%253A%25220%2525%2522%252C%2522state%2522%253A%25223%2522%252C%2522surday%2522%253A%2522148%2522%252C%2522announcementPoint%2522%253A%25220%2522%252C%2522bidSubscribe%2522%253A%2522-1%2522%252C%2522vipManager%2522%253A%25220%2522%252C%2522onum%2522%253A%252210%2522%252C%2522monitorUnreadCount%2522%253A%25220%2522%252C%2522discussCommendCount%2522%253A%25220%2522%252C%2522claimPoint%2522%253A%25220%2522%252C%2522token%2522%253A%2522eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxODIwMjYxMDI0MCIsImlhdCI6MTU4MzExNjgxNiwiZXhwIjoxNjE0NjUyODE2fQ.-i9BSFXI-82Xbl_Zx2UPx4F4xdJHXyNdT6VXOfLxoMoWCVYie65FqaQn36i0jBrpqwbZSrQy61_6i_2mtlv05w%2522%252C%2522vipToTime%2522%253A%25221595903278098%2522%252C%2522redPoint%2522%253A%25220%2522%252C%2522myAnswerCount%2522%253A%25220%2522%252C%2522myQuestionCount%2522%253A%25220%2522%252C%2522signUp%2522%253A%25220%2522%252C%2522nickname%2522%253A%2522%25E9%2599%2588%25E7%25BE%258E%2522%252C%2522privateMessagePointWeb%2522%253A%25220%2522%252C%2522privateMessagePoint%2522%253A%25220%2522%252C%2522isClaim%2522%253A%25220%2522%252C%2522isExpired%2522%253A%25220%2522%252C%2522pleaseAnswerCount%2522%253A%25220%2522%252C%2522vnum%2522%253A%25220%2522%252C%2522bizCardUnread%2522%253A%25220%2522%252C%2522mobile%2522%253A%252218202610240%2522%257D; auth_token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxODIwMjYxMDI0MCIsImlhdCI6MTU4MzExNjgxNiwiZXhwIjoxNjE0NjUyODE2fQ.-i9BSFXI-82Xbl_Zx2UPx4F4xdJHXyNdT6VXOfLxoMoWCVYie65FqaQn36i0jBrpqwbZSrQy61_6i_2mtlv05w; Hm_lpvt_e92c8d65d92d534b0fc290df538b4758=1583116818'
-    # cookies = {i.split("=")[0]: i.split("=")[1] for i in cookie.split("; ")}
-    # yanzheng(cookie,'https://www.tianyancha.com/search/ohp1/p3?key=石景山区工程')
+        except ConnectionError as f:
+            continue
+        # except Exception as f:
+        #     print(str(f))
+        #     sendemail.sendemail("1462063555@qq.com", "程序停止啦", "错误信息是:" + str(f))
+        #     exit()

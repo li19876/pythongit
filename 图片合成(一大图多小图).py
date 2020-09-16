@@ -36,13 +36,19 @@ def hec(bgimg, fimg, box):
     # region = region.rotate(180) #对图片进行旋转
     region = region.resize((box[2] - box[0], box[3] - box[1]))
     base_img.paste(region, box)
-    draw = ImageDraw.Draw(base_img)  # 修改图片
-    # font = ImageFont.truetype('C:/Windows/Fonts/SourceHanSansK-Bold.ttf', 15)
-    # draw.text((114, 327), text, fill=(0, 0, 0), font=font)  # 利用ImageDraw的内置函数，在图片上写入文字
+    # draw = ImageDraw.Draw(base_img)  # 修改图片
+    # x = 3050 + ((1400 - ((len(text) - 3) * 90)) / 2)
+    # font = ImageFont.truetype('C:/Windows/Fonts/SourceHanSansK-Bold.ttf', 90)
+    # draw.text((x, 573), text, fill=(0, 0, 0), font=font)  # 利用ImageDraw的内置函数，在图片上写入文字
     # base_img.show() # 查看合成的图片
+    # base_img.save('C:\\Users\\Administrator\\Desktop\\jilin\\' + text[:6] + '.jpg')
     base_img.save(fimgname)  # 保存图片
 
-
+def check(num):
+    if num.isdigit():
+        return int(num)
+    else:
+        return False
 if __name__ == '__main__':
     fimg = e.diropenbox("选择二维码的文件夹")
     bgimg=e.fileopenbox("选择底图")
@@ -55,7 +61,21 @@ if __name__ == '__main__':
         files =file
     for f in files[2]:
         filelist.append(files[0]+os.sep+f)
-    box = (3050,700,4450,2100)
+    print('下面开始输入二维码坐标，坐标有四位，分别是左上角的x和y以及右下角的x和y')
+    while 1:
+        lx = input('请输入左上角x坐标')
+        lx =check(lx)
+        ly = input('请输入左上角x坐标')
+        ly =check(ly)
+        rx = input('请输入右下角x坐标')
+        rx = check(rx)
+        ry = input('请输入右下角y坐标')
+        ry = check(ry)
+        if lx and ly and rx and ry:
+            break
+        else:
+            print('输入有误，坐标不能包含0或者空或者字母符号，只能是数字。请重新输入')
+    box = (lx,ly,rx,ry)
     for i in filelist:
         hec(bgimg,i,box)
 
