@@ -43,9 +43,9 @@ def parse(urllist, i):
 				urllist.append(burl)
 				print("获取编码失败放弃")
 				break
-			content = html.xpath("//div[@id='content']/text()")
+			content = html.xpath("//div[@class='contentbox']/text()")
 			# print(content)
-			title = html.xpath('string(//div[@class="bookname"]/h1)')
+			title = html.xpath('string(//div[@class="h1title"]/h1)')
 			# print(title)
 			if title:
 				break
@@ -64,12 +64,12 @@ def parse(urllist, i):
 
 # return {"content":content,"title":title}
 #主运行函数
-def run(mulu="https://www.5atxt.com/0_841/"):
+def run(mulu="http://www.heiyan.org/wodelaoqianshengya/"):
 	# mulu = "http://www.biquw.com/book/86119/"
 	res = getres(mulu)
 	html = etree.HTML(res.text.encode(res.encoding).decode(res.apparent_encoding))
-	bookname = html.xpath('//div[@id="info"]/h1/text()')[0]
-	hreflist = html.xpath("//div[@id='list']/dl/dd/a/@href")[12:]
+	bookname = html.xpath('//div[@class="book_info"]/h1/text()')[0]
+	hreflist = html.xpath("//div[@class='book_list']/ul/li/a/@href")[700:]
 	# print(hreflist)
 	urllist = []
 	for href in hreflist:
@@ -110,15 +110,15 @@ def package(bookname):
 
 
 if __name__ == "__main__":
-	bookname = '一剑独尊'
-	os.chdir(os.getcwd() + os.sep + bookname)
-	package(bookname)
-	# print("目前支持的网站有:\n","https://www.bxwx.la/\n", "https://www.5atxt.com\n","http://www.yuetutu.com http://www.xiaoshuo240.cn此行网站url列表前置可能不是12个\n","https://www.qu.la\n")
-	# mulu = input("请输入要下载的书籍目录页链接:")
-	# if mulu == "":
-	#     run()
-	# else:
-	#     run(mulu)
+	# bookname = '一剑独尊'
+	# os.chdir(os.getcwd() + os.sep + bookname)
+	# package(bookname)
+	print("目前支持的网站有:\n","https://www.bxwx.la/\n", "https://www.5atxt.com\n","http://www.yuetutu.com http://www.xiaoshuo240.cn此行网站url列表前置可能不是12个\n","https://www.qu.la\n")
+	mulu = input("请输入要下载的书籍目录页链接:")
+	if mulu == "":
+		run()
+	else:
+	  run(mulu)
 
 	# urllist = [[0, 'https://www.bxwx.la/b/12/12588/7101302.html']]
 	# parse(urllist,1)
